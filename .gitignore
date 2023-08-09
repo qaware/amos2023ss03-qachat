@@ -274,6 +274,7 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 tokens.env
+unusedTokens.env
 QAChat/Data_Processing/client_secrets.json
 QAChat/Data_Processing/credentials.json
 QAChat/Data_Processing/credentials_file.json
@@ -282,3 +283,5 @@ QAChat/Data_Processing/credentials_file.json
 *client_secrets.json
 *secret*
 credentials_file.json
+
+

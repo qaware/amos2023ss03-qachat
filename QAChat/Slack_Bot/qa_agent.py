@@ -32,7 +32,6 @@ class QAAgent(BaseAgent):
     def receive_question(self, question, say, channel_id):
         initial_message = self.client.chat_postMessage(channel=channel_id, text="...")
         initial_ts = initial_message["ts"]
-
         asynchronous_processor = AsynchronousProcessor(
             lambda message: self.client.chat_update(
                 channel=channel_id,
@@ -45,7 +44,8 @@ class QAAgent(BaseAgent):
             for answer in self.api_interface.request(question):
                 asynchronous_processor.add(answer)
         except Exception as e:
-            asynchronous_processor.add(f"Ohh there is was an error...\n{e}")
+            asynchronous_processor.add(f":warning: Something went wrong while processing your request. Please try again later.\n```{e}```\nIf the problem persists, please contact the bot administrator for assistance.`")
+            print(e)
         asynchronous_processor.end()
 
     def process_question(self, body, say):
@@ -61,7 +61,7 @@ class QAAgent(BaseAgent):
 
         text = body["event"]["text"]
         channel_id = body["event"]["channel"]
-
+        print(text)
         # Use a separate thread to call receive_question
         thread = Thread(target=self.receive_question, args=(text, say, channel_id))
         thread.start()

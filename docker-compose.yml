@@ -1,5 +1,11 @@
 version: '3'
 services:
+  weaviate:
+    image: semitechnologies/weaviate:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/var/lib/weaviate
   data_processing:
     build: ./QAChat/Data_Processing
     volumes:
