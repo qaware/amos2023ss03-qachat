@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: 2023 Felix Nützel
 # SPDX-FileCopyrightText: 2023 Jesse Palarus
 # SPDX-FileCopyrightText: 2023 Amela Pucic
+from __future__ import annotations # todo: remove when python 3.10 is installed (for local use)
 
 from time import time
 
@@ -23,14 +24,14 @@ from QAChat.Common.bucket_managing import download_database
 
 class QABot:
     def __init__(
-        self,
-        embeddings=None,
-        database=None,
-        model=None,
-        translator=None,
-        embeddings_gpu=False,
-        repo_id="TheBloke/WizardLM-13B-V1-1-SuperHOT-8K-GGML",
-        filename="wizardlm-13b-v1.1-superhot-8k.ggmlv3.q5_0.bin",
+            self,
+            embeddings=None,
+            database=None,
+            model=None,
+            translator=None,
+            embeddings_gpu=False,
+            repo_id="TheBloke/WizardLM-13B-V1-1-SuperHOT-8K-GGML",
+            filename="wizardlm-13b-v1.1-superhot-8k.ggmlv3.q5_0.bin",
     ):
         self.answer = None
         self.context = None
@@ -56,16 +57,16 @@ class QABot:
         if model is None:
             self.model = self.get_llama_model(repo_id=repo_id, filename=filename)
 
-        self.translator = translator
-        if translator is None:
-            self.translator = DeepLTranslator()
+        # self.translator = translator
+        # if translator is None:
+        #     self.translator = DeepLTranslator()
 
     def get_llama_model(
-        self,
-        repo_id,
-        filename,
-        n_ctx=2048,
-        max_tokens=512,
+            self,
+            repo_id,
+            filename,
+            n_ctx=2048,
+            max_tokens=512,
     ):
         path = hf_hub_download(repo_id=repo_id, filename=filename)
 
@@ -81,7 +82,7 @@ class QABot:
         )
 
     def answer_question_with_context(
-        self, question: str, context: List[str], handler=None
+            self, question: str, context: List[str], handler=None
     ) -> str:
         """
         This method takes a question and a list of context strings as input, and attempts to answer the question using the provided context.
@@ -149,10 +150,10 @@ class QABot:
             for context in self.database.similarity_search_by_vector(embedding, k=3)
         ]
 
-    def translate_text(self, question, language="EN-US"):
-        return self.translator.translate_to(
-            question, language, use_spacy_to_detect_lang_if_needed=False
-        )
+    # def translate_text(self, question, language="EN-US"):
+    #     return self.translator.translate_to(
+    #         question, language, use_spacy_to_detect_lang_if_needed=False
+    #     )
 
     def answer_question(self, question: str, handler: StreamLLMCallbackHandler | None):
         """
@@ -171,26 +172,26 @@ class QABot:
         """
 
         print(f"Receive Question: {question}")
-        translation = self.translate_text(question)
-        if handler is not None:
-            handler.lang = translation.detected_source_lang
+        # translation = self.translate_text(question)
+        # if handler is not None:
+        #     handler.lang = translation.detected_source_lang
 
-        translated_question = translation.text
-        print(f"Translation: {translated_question}")
-        context = self.__sim_search(translated_question)
+        # translated_question = translation.text
+        print(f"Translation: {question}")
+        context = self.__sim_search(question)
         print(f"Context: {context}")
         answer = self.answer_question_with_context(
-            translated_question, context, handler
+            question, context, handler
         )
         print(f"Answer: {answer}")
-        if translation.detected_source_lang != "EN-US":
-            answer = self.translate_text(answer, translation.detected_source_lang).text
+        # if translation.detected_source_lang != "EN-US":
+        #     answer = self.translate_text(answer, translation.detected_source_lang).text
 
         print(f"Translated answer: {answer}")
         return {
-            "answer": answer,
-            "question": question,
-            "context": context,
+            "answer": "answer",
+            "question": "question",
+            "context": "context",
         }
 
 
