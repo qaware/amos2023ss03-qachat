@@ -20,6 +20,8 @@ load_dotenv(get_tokens_path())
 SLACK_TOKEN = os.getenv("SLACK_TOKEN")
 SLACK_APP_TOKEN = os.getenv("SLACK_APP_TOKEN")
 SIGNING_SECRET = os.getenv("SIGNING_SECRET")
+WEAVIATE_URL = os.getenv("WEAVIATE_URL")
+
 
 
 class SlackPreprocessor(DataPreprocessor):
@@ -28,7 +30,7 @@ class SlackPreprocessor(DataPreprocessor):
         self.conversation_store = {}
         self.conversation_history = []
         self.count_found_messages = 0
-        self.weaviate = weaviate.Client(embedded_options=EmbeddedOptions())
+        self.weaviate = weaviate.Client(url=WEAVIATE_URL)
         init_db(self.weaviate)
 
     def __map_users(self):

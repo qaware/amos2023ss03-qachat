@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2023 Felix Nützel
 # SPDX-FileCopyrightText: 2023 Jesse Palarus
+import os
 
 from dotenv import load_dotenv
 from weaviate.embedded import EmbeddedOptions
@@ -11,8 +12,8 @@ from get_tokens import get_tokens_path
 load_dotenv(get_tokens_path())
 bucket_name = "qabot_db_data"
 blob_folder = "weaviate"
-weaviate_client = weaviate.Client(embedded_options=EmbeddedOptions())
-
+WEAVIATE_URL = os.getenv("WEAVIATE_URL")
+weaviate_client = weaviate.Client(url=WEAVIATE_URL)
 
 def upload_database():
     """Uploads a file to the bucket."""

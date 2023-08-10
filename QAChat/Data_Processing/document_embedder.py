@@ -3,8 +3,7 @@
 # SPDX-FileCopyrightText: 2023 Amela Pucic
 # SPDX-FileCopyrightText: 2023 Felix Nützel
 # SPDX-FileCopyrightText: 2023 Emanuel Erben
-
-
+import os
 from datetime import datetime
 from enum import Enum
 import weaviate
@@ -23,6 +22,11 @@ from QAChat.Common.init_db import init_db
 from QAChat.Common.deepL_translator import DeepLTranslator
 from get_tokens import get_tokens_path
 from QAChat.Data_Processing.text_transformer import transform_text_to_chunks
+
+load_dotenv(get_tokens_path())
+
+# Get WEAVIATE_URL
+WEAVIATE_URL = os.getenv("WEAVIATE_URL")
 
 
 class DataSource(Enum):
@@ -47,8 +51,7 @@ class DocumentEmbedder:
         )
 
         load_dotenv(get_tokens_path())
-
-        self.weaviate_client = weaviate.Client(embedded_options=EmbeddedOptions())
+        self.weaviate_client = weaviate.Client(url=WEAVIATE_URL)
 
         self.vector_store = Weaviate(
             client=self.weaviate_client,
@@ -60,6 +63,10 @@ class DocumentEmbedder:
         init_db(self.weaviate_client)
 
         # name identification
+        # todo: no download if already downloaded --> it is always downloading, when the object is called? -
+        #  -> downloads are already satisfied but it still loads it (if the dummy data is longer it need more "downloads";
+        #  it seem to be in the transformer)
+
         spacy.cli.download("xx_ent_wiki_sm")
         spacy.load("xx_ent_wiki_sm")
         self.muulti_lang_nlp = xx_ent_wiki_sm.load()
@@ -68,7 +75,8 @@ class DocumentEmbedder:
         self.de_lang_nlp = de_core_news_sm.load()
         self.translator = DeepLTranslator()
 
-    def store_information_in_database(self, typ: DataSource):
+    def \
+            store_information_in_database(self, typ: DataSource):
         if typ == DataSource.DUMMY:
             from dummy_preprocessor import DummyPreprocessor
 
@@ -182,6 +190,7 @@ class DocumentEmbedder:
             doc = nlp(data.text)
             already_replaced = []
             for ent in doc.ents:
+
                 if ent.text in already_replaced or ent.label_ != "PER":
                     continue
                 # only person names are flanked by tag and multiplicity is avoided
@@ -193,7 +202,7 @@ class DocumentEmbedder:
         return LanguageDetector()
 
     def get_target_language(self, text):
-        Language.factory("language_detector", func=self.get_lang_detector)
+        # Language.factory("language_detector", func=self.get_lang_detector)
         if "sentencizer" not in self.muulti_lang_nlp.pipe_names:
             self.muulti_lang_nlp.add_pipe("sentencizer")
         if "language_detector" not in self.muulti_lang_nlp.pipe_names:

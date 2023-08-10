@@ -5,6 +5,7 @@
 # SPDX-FileCopyrightText: 2023 Amela Pucic
 from __future__ import annotations # todo: remove when python 3.10 is installed (for local use)
 
+import os
 from time import time
 
 from huggingface_hub import hf_hub_download
@@ -21,6 +22,10 @@ from QAChat.QA_Bot.stream_LLM_callback_handler import StreamLLMCallbackHandler
 from get_tokens import get_tokens_path
 from QAChat.Common.bucket_managing import download_database
 
+load_dotenv(get_tokens_path())
+
+# Get WEAVIATE_URL
+WEAVIATE_URL = os.getenv("WEAVIATE_URL")
 
 class QABot:
     def __init__(
@@ -36,7 +41,7 @@ class QABot:
         self.answer = None
         self.context = None
         load_dotenv(get_tokens_path())
-        download_database()
+        # download_database()
         self.embeddings = embeddings
         if embeddings is None:
             self.embeddings = HuggingFaceInstructEmbeddings(
@@ -46,7 +51,7 @@ class QABot:
 
         self.database = database
         if database is None:
-            client = weaviate.Client(embedded_options=EmbeddedOptions())
+            client = weaviate.Client(url=WEAVIATE_URL)
             self.database = Weaviate(
                 client=client,
                 embedding=self.embeddings,
@@ -189,14 +194,14 @@ class QABot:
 
         print(f"Translated answer: {answer}")
         return {
-            "answer": "answer",
-            "question": "question",
-            "context": "context",
+            "answer": answer,
+            "question": question,
+            "context": context,
         }
 
 
 if __name__ == "__main__":
     qa_bot = QABot()
     start = time()
-    qa_bot.answer_question("Was ist die farbe vom Himmel?", None)
+    qa_bot.answer_question("What is the color of the sky?", None)
     print(f"Time: {time() - start}")

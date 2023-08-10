@@ -2,22 +2,28 @@
 # SPDX-FileCopyrightText: 2023 Abdelkader Alkadour
 # SPDX-FileCopyrightText: 2023 Amela Pucic
 # SPDX-FileCopyrightText: 2023 Felix Nützel
-
+import os
 import unittest
 import weaviate
+from dotenv import load_dotenv
 from weaviate.embedded import EmbeddedOptions
 import re
 
 from QAChat.Common.init_db import init_db
+from get_tokens import get_tokens_path
 
 """
 Here is an integration test to  verify the existence of two databses
 """
 
+load_dotenv(get_tokens_path())
+
+# Get WEAVIATE_URL
+WEAVIATE_URL = os.getenv("WEAVIATE_URL")
 
 class DatabaseIntegrationTestDBExist(unittest.TestCase):
     def setUp(self):
-        self.weaviate_client = weaviate.Client(embedded_options=EmbeddedOptions())
+        self.weaviate_client = weaviate.Client(url=WEAVIATE_URL)
         init_db(self.weaviate_client)
 
     def test_if_data_embedding_exists(self):
@@ -48,7 +54,8 @@ Here is an integration to check the writing, reading and deleting from the datab
 
 class DatabaseIntegrationTestDBInteract(unittest.TestCase):
     def setUp(self):
-        self.weaviate_client = weaviate.Client(embedded_options=EmbeddedOptions())
+        # self.weaviate_client = weaviate.Client(embedded_options=EmbeddedOptions())
+        self.weaviate_client = weaviate.Client(url=WEAVIATE_URL)
         init_db(self.weaviate_client)
 
     def test_db_interaction(self):

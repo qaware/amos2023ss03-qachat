@@ -15,7 +15,7 @@ class DummyPreprocessor(DataPreprocessor):
     def load_preprocessed_data(
         self, end_of_timeframe: datetime, start_of_timeframe: datetime
     ) -> List[DataInformation]:
-        df = pd.read_csv("../../DummyData/qa_less_50.csv", sep=";")
+        df = pd.read_csv("./DummyData/qa_less_50.csv", sep=";")
         raw_data = []
         for index, row in df.iterrows():
             raw_data.append(
@@ -30,5 +30,5 @@ class DummyPreprocessor(DataPreprocessor):
         return [
             data
             for data in raw_data
-            if start_of_timeframe < data.last_changed <= end_of_timeframe
+            # if start_of_timeframe < data.last_changed <= end_of_timeframe
         ]

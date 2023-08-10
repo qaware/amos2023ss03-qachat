@@ -31,8 +31,6 @@ class DeepLTranslator:
         super().__init__()
         # initialize a DeepL translator service
         self.translator = deepl.Translator(DEEPL_TOKEN)
-        spacy.cli.download("xx_ent_wiki_sm")
-        spacy.load("xx_ent_wiki_sm")
         self.muulti_lang_nlp = xx_ent_wiki_sm.load()
         Language.factory("language_detector", func=self.get_lang_detector)
         if "sentencizer" not in self.muulti_lang_nlp.pipe_names:
