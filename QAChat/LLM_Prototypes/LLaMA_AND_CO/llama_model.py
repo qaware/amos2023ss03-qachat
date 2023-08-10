@@ -30,7 +30,7 @@ class LLaMAModel(Enum):
     Vicuna13B = ("Pi3141/vicuna-13b-v1.1-ggml", "ggml-model-q8_0.bin")
     Vicuna13BGPT4 = (
         "TheBloke/gpt4-x-vicuna-13B-GGML",
-        "gpt4-x-vicuna-13B.ggml.q5_1.bin",
+        "gpt4-x-vicuna-13B.ggmlv3.q5_1.bin",
     )
     StableVicuna13B = (
         "TheBloke/stable-vicuna-13B-GGML",
@@ -42,8 +42,8 @@ class LLaMAModel(Enum):
     )
 
 
-def get_model(model_typ: LLaMAModel, n_ctx=512, max_tokens=256):
-    path = hf_hub_download(repo_id=model_typ.value[0], filename=model_typ.value[1])
+def get_model(model_typ: LLaMAModel, n_ctx=512, max_tokens=256*3):
+    path = hf_hub_download(repo_id="TheBloke/WizardLM-13B-V1-1-SuperHOT-8K-GGML", filename="wizardlm-13b-v1.1-superhot-8k.ggmlv3.q5_0.bin")
 
     return LlamaCpp(
         model_path=path,
@@ -55,8 +55,8 @@ def get_model(model_typ: LLaMAModel, n_ctx=512, max_tokens=256):
 
 if __name__ == "__main__":
     model = get_model(LLaMAModel.Vicuna13BGPT4)
-    print(
-        model.generate(["### USER: Was ist 2+2?\n### ASSISTANT: "])
-        .generations[0][0]
-        .text
-    )
+    print("Answer:" +
+          model.generate(["### USER: Was ist 2+2?\n### ASSISTANT:  "])
+          .generations[0][0]
+          .text
+          )

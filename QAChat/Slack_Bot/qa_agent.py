@@ -4,6 +4,7 @@
 # SPDX-FileCopyrightText: 2023 Jesse Palarus
 import os
 import re
+import traceback
 
 from threading import Thread
 
@@ -45,6 +46,7 @@ class QAAgent(BaseAgent):
                 asynchronous_processor.add(answer)
         except Exception as e:
             asynchronous_processor.add(f":warning: Something went wrong while processing your request. Please try again later.\n```{e}```\nIf the problem persists, please contact the bot administrator for assistance.`")
+            traceback.print_exc()
             print(e)
         asynchronous_processor.end()
 

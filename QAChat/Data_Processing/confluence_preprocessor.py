@@ -30,6 +30,9 @@ CONFLUENCE_ADDRESS = os.getenv("CONFLUENCE_ADDRESS")
 CONFLUENCE_USERNAME = os.getenv("CONFLUENCE_USERNAME")
 CONFLUENCE_TOKEN = os.getenv("CONFLUENCE_TOKEN")
 
+# Get Weaviate URL from environment variables
+WEAVIATE_URL = os.getenv("WEAVIATE_URL")
+
 
 class ConfluencePreprocessor(DataPreprocessor):
     def __init__(self):
@@ -45,7 +48,7 @@ class ConfluencePreprocessor(DataPreprocessor):
         self.all_page_information = []
         self.restricted_pages = []
         self.restricted_spaces = []
-        self.weaviate_client = weaviate.Client(embedded_options=EmbeddedOptions())
+        self.weaviate_client = weaviate.Client(url=WEAVIATE_URL)
         self.last_update_lookup = dict()
         self.chunk_id_lookup_table = dict()
         self.g_docs_proc = GoogleDocPreProcessor()

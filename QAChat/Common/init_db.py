@@ -1,5 +1,11 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2023 Felix Nützel
+import os
+
+import weaviate
+from dotenv import load_dotenv
+
+
 def init_db(weaviate_client):
     global client
     client = weaviate_client
@@ -57,3 +63,15 @@ def add_entry_to_black_list(weaviate_client, identifier, note=None):
     return weaviate_client.data_object.create(
         {"identifier": identifier, "note": note}, "BlackList"
     )
+
+if __name__ == "__main__":
+    load_dotenv()
+
+    # init weaviate client
+    WEAVIATE_URL = os.getenv("WEAVIATE_URL")
+    weaviate_client = weaviate.Client(url=WEAVIATE_URL)
+
+    # init db
+    init_db(weaviate_client)
+
+

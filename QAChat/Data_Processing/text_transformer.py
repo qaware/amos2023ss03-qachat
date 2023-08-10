@@ -21,10 +21,10 @@ def transform_text_to_chunks(data_information_list):
     """
 
     new_data_information_list = []
-
+    translator = DeepLTranslator()
     for data_information in data_information_list:
         # translate text
-        translator = DeepLTranslator()
+
         data_information.text = (
             translator.translate_to(data_information.text, "EN-US")
             .text.replace("<name>", "")

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2023 Felix Nützel
-
+from dotenv import load_dotenv
 from weaviate.embedded import EmbeddedOptions
 import weaviate
 from prettytable import PrettyTable
@@ -9,8 +9,19 @@ import os
 import re
 import textwrap
 
+from get_tokens import get_tokens_path
+
 LIMIT = 1000
 MAX_TEXT_LENGTH = 150
+
+load_dotenv(get_tokens_path())
+
+# Get WEAVIATE_URL
+WEAVIATE_URL = os.getenv("WEAVIATE_URL")
+weaviate_client = weaviate.Client(url=WEAVIATE_URL)
+
+
+
 
 
 def print_index_content(index_name=None, condition=None, limit=LIMIT):
@@ -22,10 +33,9 @@ def print_index_content(index_name=None, condition=None, limit=LIMIT):
     """
 
     # silences log messages from startup
-    fd = os.open("/dev/null", os.O_WRONLY)
-    os.dup2(fd, 2)
+    # fd = os.open("/dev/null", os.O_WRONLY)
+    # os.dup2(fd, 2)
 
-    weaviate_client = weaviate.Client(embedded_options=EmbeddedOptions())
     index_dict = weaviate_client.schema.get(index_name)
     if index_name is None:
         for class_info in index_dict["classes"]:
@@ -75,7 +85,7 @@ def print_index_content(index_name=None, condition=None, limit=LIMIT):
 
 
 def wrap_text(text, max_width):
-    return "\n".join(textwrap.wrap(text, max_width))
+    return "\n".join(textwrap.wrap(str(text), max_width))
 
 
 if __name__ == "__main__":
