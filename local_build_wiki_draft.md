@@ -121,6 +121,13 @@ Make sure that the Google Cloud QA Token is different from the Weaviate Token.
 <!-- TODO: Add the tokens to the project -->
 <!-- TODO: Maybe there'll be different token files -> add to documentation --> 
 
+### 6. Loading Data into the Weaviate Database 
+First you need to install poppler: 
+```bash
+brew install poppler
+brew install tesseract
+```
+
 ## Setup
 
 ### 1. Start the Docker Containers
@@ -131,7 +138,15 @@ Start the Docker Containers with the following command:
 docker-compose up -d
 ````
 
-### 2. Start the Slack Bot
+### 2. Connect to server
+
+In order to connect to the VM of the QA Bot you need to connect to the server with the following command:
+
+```` bash
+ssh <USER>@<HOST> -L <LOCAL_PORT>:<REMOTE_HOST>:<REMOTE_PORT>
+````
+
+### 3. Start the Slack Bot
 
 If you want to run the Slack Bot local, make sure that the there is _no other instance_ of the Slack Bot running.
 You can start the Slack Bot with the following command:
@@ -144,7 +159,7 @@ You can start the Slack Bot with the following command:
 Currently the Slack Bot run with the VM instance of the QA-Bot to ensure performance. <!-- TODO: Add possibility to run
 the Slack-Bot local (without VM) -->
 
-### 3. Start the QA Bot
+### 4. Start the QA Bot
 
  <!--- TODO: Add guide how to increase performance on MacBook ---> 
 
@@ -157,7 +172,7 @@ Because of the used AI Model, the QA-Bot needs a lot of performance and it can q
 Therefore, it is
 recommended to run the QA-Bot on a VM and only use the QA-Bot for local testing.
 
-### 4. Initialize the Database
+### 5. Initialize the Database
 
 If you run the project local you will have an empty database. To load dummy data run the following command:
 
@@ -165,7 +180,15 @@ If you run the project local you will have an empty database. To load dummy data
 ./startupdata.sh
 ````
 
-### 5. Check Content of the Database
+This will load the dummy data into the database.
+If you want to load your own data, you can use the following command:
+
+````bash
+````
+
+<!-- TODO: Add guide how to load own data into the database; currently have to go into the startupdata.sh file and delete "DUMMY" -->
+
+### 6. Check Content of the Database
 
 To see the content of the database you can use the following command:
 

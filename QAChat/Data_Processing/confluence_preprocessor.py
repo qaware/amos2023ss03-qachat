@@ -30,6 +30,8 @@ CONFLUENCE_ADDRESS = os.getenv("CONFLUENCE_ADDRESS")
 CONFLUENCE_USERNAME = os.getenv("CONFLUENCE_USERNAME")
 CONFLUENCE_TOKEN = os.getenv("CONFLUENCE_TOKEN")
 
+CONFLUENCE_SPACE_WHITELIST = os.getenv("CONFLUENCE_SPACE_WHITELIST").split(", ")
+
 # Get Weaviate URL from environment variables
 WEAVIATE_URL = os.getenv("WEAVIATE_URL")
 
@@ -92,13 +94,14 @@ class ConfluencePreprocessor(DataPreprocessor):
                 # exclude personal/user spaces only global spaces
                 if space["type"] == "global":
                     # exclude blacklisted spaces
-                    if space["key"] not in self.restricted_spaces:
-                        self.all_spaces.append(space)
+                    if space["key"] not in self.restricted_spaces and space["key"] in CONFLUENCE_SPACE_WHITELIST :
+                            self.all_spaces.append(space)
 
             # Check if there are more spaces
             if len(spaces_data) < limit:
                 break
             start = start + limit
+        self.all_spaces
 
     def get_all_page_ids_from_spaces(self):
         # Get all pages from a space
@@ -139,6 +142,7 @@ class ConfluencePreprocessor(DataPreprocessor):
             # Set final parameters for DataInformation
             last_changed = self.get_last_modified_formated_date(page_info)
             text = self.get_raw_text_from_page(page_with_body)
+            print(f"Länge {page_id}: %d \n" % len(text))
 
             # get googledoc url:
             urls = re.findall(r"https?://docs\.google\.com\S+", text)
