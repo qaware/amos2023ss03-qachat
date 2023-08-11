@@ -21,8 +21,10 @@ if __name__ == "__main__":
         print("Storing all data")
         DocumentEmbedder().store_information_in_database(DataSource.CONFLUENCE)
         DocumentEmbedder().store_information_in_database(DataSource.SLACK)
+    # if neither of the above, print error message
+    else:
+        print("Sorry, wrong argument. Please use 'DUMMY' or no argument at all.")
 
-    # DocumentEmbedder().store_information_in_database(DataSource.DUMMY)
 
 
 #    upload_database()
