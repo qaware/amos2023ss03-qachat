@@ -21,14 +21,17 @@ def transform_text_to_chunks(data_information_list):
     """
 
     new_data_information_list = []
-    translator = DeepLTranslator()
+    # translator = DeepLTranslator() # TODO: uncomment this line to enable translation
     for data_information in data_information_list:
         # translate text
 
+        # data_information.text = (
+        #     translator.translate_to(data_information.text, "EN-US")
+        #     .text.replace("<name>", "")
+        #     .replace("</name>", "")
+        # ) # TODO: uncomment this line to enable translation
         data_information.text = (
-            translator.translate_to(data_information.text, "EN-US")
-            .text.replace("<name>", "")
-            .replace("</name>", "")
+            data_information.text.replace("<name>", "").replace("</name>", "")
         )
 
         # split the text
