@@ -9,7 +9,7 @@ while IFS= read -r line || [ -n "$line" ]; do
 done < "$env_file"
 
 #venv/bin/python3 ${PWD}/Testing/db_integration_test.py
-venv/bin/python3 ${PWD}/QAChat/Data_Processing/main.py DUMMY
+#venv/bin/python3 ${PWD}/QAChat/Data_Processing/main.py DUMMY
 
 venv/bin/python3 ${PWD}/QAChat/Common/db_info.py BlackList
 venv/bin/python3 ${PWD}/QAChat/Common/db_info.py LastModified

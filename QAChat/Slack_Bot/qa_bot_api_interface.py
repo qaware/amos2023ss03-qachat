@@ -21,7 +21,11 @@ class QABotAPIInterface:
                 if line:
                     decoded_line = line.decode("utf-8")
                     data = json.loads(decoded_line)
-                    yield data["text"]
+                    if "text" in data: 
+                        yield data["text"]
+                    else:
+                        print("No text in data")
+                        raise Exception("The response from the API did not contain any text.")
 
         except requests.exceptions.Timeout:
             print("Timeout")

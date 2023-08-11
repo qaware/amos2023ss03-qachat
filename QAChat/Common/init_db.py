@@ -5,6 +5,10 @@ import os
 import weaviate
 from dotenv import load_dotenv
 
+from QAChat.Common.db_info import print_index_content
+from get_tokens import get_tokens_path
+
+
 
 def init_db(weaviate_client):
     global client
@@ -64,8 +68,9 @@ def add_entry_to_black_list(weaviate_client, identifier, note=None):
         {"identifier": identifier, "note": note}, "BlackList"
     )
 
+
 if __name__ == "__main__":
-    load_dotenv()
+    load_dotenv(get_tokens_path())
 
     # init weaviate client
     WEAVIATE_URL = os.getenv("WEAVIATE_URL")
@@ -74,4 +79,5 @@ if __name__ == "__main__":
     # init db
     init_db(weaviate_client)
 
-
+    # db info
+    print_index_content()
