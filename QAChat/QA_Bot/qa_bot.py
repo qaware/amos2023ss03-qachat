@@ -14,15 +14,11 @@ from langchain.embeddings import HuggingFaceInstructEmbeddings
 from langchain.vectorstores import Weaviate
 from weaviate.embedded import EmbeddedOptions
 import weaviate
-from dotenv import load_dotenv
 from typing import List
 
 from QAChat.Common.deepL_translator import DeepLTranslator
 from QAChat.QA_Bot.stream_LLM_callback_handler import StreamLLMCallbackHandler
-from get_tokens import get_tokens_path
 from QAChat.Common.bucket_managing import download_database
-
-load_dotenv(get_tokens_path())
 
 # Get WEAVIATE_URL
 WEAVIATE_URL = os.getenv("WEAVIATE_URL")
@@ -40,7 +36,6 @@ class QABot:
     ):
         self.answer = None
         self.context = None
-        load_dotenv(get_tokens_path())
         # download_database()
         self.embeddings = embeddings
         if embeddings is None:

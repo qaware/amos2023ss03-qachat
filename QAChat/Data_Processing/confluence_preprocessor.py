@@ -13,17 +13,12 @@ from weaviate.embedded import EmbeddedOptions
 import weaviate
 from atlassian import Confluence
 from bs4 import BeautifulSoup
-from dotenv import load_dotenv
 
 from QAChat.Data_Processing.google_doc_preprocessor import GoogleDocPreProcessor
 from data_preprocessor import DataPreprocessor
 from document_embedder import DataInformation, DataSource
 from QAChat.Data_Processing.pdf_reader import PDFReader
-from get_tokens import get_tokens_path
 from QAChat.Common.init_db import init_db
-
-load_dotenv(get_tokens_path())
-
 
 # Get Confluence API credentials from environment variables
 CONFLUENCE_ADDRESS = os.getenv("CONFLUENCE_ADDRESS")

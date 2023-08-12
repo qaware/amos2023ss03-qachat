@@ -2,14 +2,10 @@
 # SPDX-FileCopyrightText: 2023 Felix Nützel
 # SPDX-FileCopyrightText: 2023 Jesse Palarus
 import os
-
-from dotenv import load_dotenv
 from weaviate.embedded import EmbeddedOptions
 import weaviate
 from QAChat.Common.init_db import clear_db
-from get_tokens import get_tokens_path
 
-load_dotenv(get_tokens_path())
 bucket_name = "qabot_db_data"
 blob_folder = "weaviate"
 WEAVIATE_URL = os.getenv("WEAVIATE_URL")
@@ -41,7 +37,6 @@ def download_database():
 
 def main():
     download_database()
-
 
 if __name__ == "__main__":
     main()

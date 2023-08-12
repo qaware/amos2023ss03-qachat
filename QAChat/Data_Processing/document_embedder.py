@@ -9,7 +9,6 @@ from enum import Enum
 import weaviate
 from spacy.language import Language
 from spacy_langdetect import LanguageDetector
-from dotenv import load_dotenv
 from langchain.embeddings import HuggingFaceInstructEmbeddings
 from langchain.vectorstores import Weaviate
 from weaviate.embedded import EmbeddedOptions
@@ -20,21 +19,16 @@ import de_core_news_sm
 from typing import List
 from QAChat.Common.init_db import init_db
 from QAChat.Common.deepL_translator import DeepLTranslator
-from get_tokens import get_tokens_path
 from QAChat.Data_Processing.text_transformer import transform_text_to_chunks
-
-load_dotenv(get_tokens_path())
 
 # Get WEAVIATE_URL
 WEAVIATE_URL = os.getenv("WEAVIATE_URL")
-
 
 class DataSource(Enum):
     SLACK = "slack"
     CONFLUENCE = "confluence"
     DRIVE = "drive"
     DUMMY = "dummy"
-
 
 class DataInformation:
     def __init__(self, id: str, last_changed: datetime, typ: DataSource, text: str):
@@ -50,7 +44,6 @@ class DocumentEmbedder:
             model_name="hkunlp/instructor-xl",
         )
 
-        load_dotenv(get_tokens_path())
         self.weaviate_client = weaviate.Client(url=WEAVIATE_URL)
 
         self.vector_store = Weaviate(
@@ -59,8 +52,6 @@ class DocumentEmbedder:
             index_name="Embeddings",
             text_key="text",
         )
-
-        init_db(self.weaviate_client)
 
         # name identification
         # todo: no download if already downloaded --> it is always downloading, when the object is called? -

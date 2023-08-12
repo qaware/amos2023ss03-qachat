@@ -5,10 +5,7 @@ import random
 import time
 from unittest.mock import Mock, create_autospec
 
-from dotenv import load_dotenv
-
 from QAChat.QA_Bot.qa_bot import QABot
-from get_tokens import get_tokens_path
 
 mock = Mock()
 
@@ -154,7 +151,6 @@ def test_overall_performance():
 
 
 if __name__ == "__main__":
-    load_dotenv(get_tokens_path())
     test_llm_speed()
     test_deepl_speed()
     test_embedding_speed()
