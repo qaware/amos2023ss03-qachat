@@ -6,17 +6,14 @@
 import os
 from datetime import datetime
 from typing import List
-from dotenv import load_dotenv
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 import weaviate
-from get_tokens import get_tokens_path
 from weaviate.embedded import EmbeddedOptions
 from QAChat.Data_Processing.data_preprocessor import DataPreprocessor
 from QAChat.Data_Processing.document_embedder import DataInformation, DataSource
 from QAChat.Common.init_db import init_db
 
-load_dotenv(get_tokens_path())
 SLACK_TOKEN = os.getenv("SLACK_TOKEN")
 SLACK_APP_TOKEN = os.getenv("SLACK_APP_TOKEN")
 SIGNING_SECRET = os.getenv("SIGNING_SECRET")

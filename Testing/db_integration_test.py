@@ -5,18 +5,14 @@
 import os
 import unittest
 import weaviate
-from dotenv import load_dotenv
 from weaviate.embedded import EmbeddedOptions
 import re
 
 from QAChat.Common.init_db import init_db
-from get_tokens import get_tokens_path
 
 """
 Here is an integration test to  verify the existence of two databses
 """
-
-load_dotenv(get_tokens_path())
 
 # Get WEAVIATE_URL
 WEAVIATE_URL = os.getenv("WEAVIATE_URL")

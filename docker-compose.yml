@@ -1,7 +1,8 @@
-version: '3'
+version: '3.8'
 services:
   weaviate:
     image: semitechnologies/weaviate:latest
+    restart: unless-stopped
     ports:
       - "8080:8080"
     environment:
@@ -11,25 +12,47 @@ services:
       DEFAULT_VECTORIZER_MODULE: 'none'
       CLUSTER_HOSTNAME: 'node1'
     volumes:
-      - ./data:/var/lib/weaviate
+      - ./weaviate_data:/var/lib/weaviate
+    networks:
+      - qachat
 
   data_processing:
     build: ./QAChat/Data_Processing
+    depends_on:
+      - weaviate
+    env_file:
+      - tokens_local.env
     volumes:
-      - ./get_tokens.py:/get_tokens.py
+      - ./torch_data:/root/.cache/torch/
+      - ./DummyData:/DummyData
       - ./QAChat/Common:/QAChat/Common
       - ./QAChat/Data_Processing:/QAChat/Data_Processing
+    entrypoint: ["python", "/QAChat/Data_Processing/main.py", "CLEAR", "DUMMY"]
+    networks:
+      - qachat
 
   qa_bot:
     build: ./QAChat/QA_Bot
+    restart: unless-stopped
+    depends_on:
+      - weaviate
     volumes:
-      - ./get_tokens.py:/get_tokens.py
+      - ./huggingface_data:/root/.cache/huggingface/
       - ./QAChat/Common:/QAChat/Common
       - ./QAChat/QA_Bot:/QAChat/QA_Bot
+    networks:
+      - qachat
 
   slack_bot:
     build: ./QAChat/Slack_Bot
+    restart: unless-stopped
+    depends_on:
+      - qa_bot
     volumes:
-      - ./get_tokens.py:/get_tokens.py
       - ./QAChat/Common:/QAChat/Common
       - ./QAChat/Slack_Bot:/QAChat/Slack_Bot
+    networks:
+      - qachat
+
+networks:
+  qachat:

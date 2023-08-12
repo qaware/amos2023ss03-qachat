@@ -5,11 +5,6 @@ import json
 import os
 
 import requests
-from dotenv import load_dotenv
-from get_tokens import get_tokens_path
-
-load_dotenv(get_tokens_path())
-
 
 class QABotAPIInterface:
     def request(self, question):

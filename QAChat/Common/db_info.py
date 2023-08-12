@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2023 Felix Nützel
-from dotenv import load_dotenv
 from weaviate.embedded import EmbeddedOptions
 import weaviate
 from prettytable import PrettyTable
@@ -9,12 +8,8 @@ import os
 import re
 import textwrap
 
-from get_tokens import get_tokens_path
-
 LIMIT = 1000
 MAX_TEXT_LENGTH = 150
-
-load_dotenv(get_tokens_path())
 
 # Get WEAVIATE_URL
 WEAVIATE_URL = os.getenv("WEAVIATE_URL")

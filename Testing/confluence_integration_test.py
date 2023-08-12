@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2023 Hafidz Arifin
 
-from dotenv import load_dotenv
 from atlassian import Confluence
 from bs4 import BeautifulSoup
 import unittest
@@ -12,8 +11,6 @@ import os
 import io
 
 from QAChat.Data_Processing.pdf_reader import PDFReader
-
-load_dotenv("../QAChat/tokens.env")
 
 # Get Confluence API credentials from environment variables
 CONFLUENCE_ADDRESS = os.getenv("CONFLUENCE_ADDRESS")

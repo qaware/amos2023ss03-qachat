@@ -16,12 +16,9 @@ from slack_bolt import App
 from QAChat.Common.asynchronous_processor import AsynchronousProcessor
 from QAChat.Slack_Bot.base_agent import BaseAgent
 from QAChat.Slack_Bot.qa_bot_api_interface import QABotAPIInterface
-from get_tokens import get_tokens_path
 
-load_dotenv(get_tokens_path())
 SLACK_TOKEN = os.getenv("SLACK_TOKEN")
 SLACK_APP_TOKEN = os.getenv("SLACK_APP_TOKEN")
-
 
 class QAAgent(BaseAgent):
     def __init__(self, app=None, client=None, handler=None, api_interface=None):

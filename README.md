@@ -22,3 +22,20 @@ Developer: [@Felix-012](https://github.com/Felix-012), [@emuguy1](https://github
 
 ## Documentation
 - For the Team Google Sheet go to: [Google Sheet](https://docs.google.com/spreadsheets/d/1YPjbiAhNvHcSZrW76hD67fqGCg3-shARfk5d4C8jOtA)
+
+## Local Development
+
+### Weaviate
+
+A local node is started via the following docker command
+
+```shell
+$ docker compose up weaviate -d
+```
+
+### load db with dummy data
+
+```shell
+$ docker compose build data_processing
+$ docker compose up data_processing --build
+```

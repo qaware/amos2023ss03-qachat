@@ -1,16 +1,22 @@
 FROM python:3.10
 
-COPY . /QAChat/Data_Processing/
+#RUN mkdir -p QAChat/Data_Processing
+#WORKDIR /QAChat/Data_Processing
 
-WORKDIR /QAChat/Data_Processing
+#pip install --upgrade pip
 
-RUN pip install -r requirements.txt
-
+COPY requirements.txt .
+RUN pip install --verbose -r requirements.txt
 RUN rm -f requirements.txt
 
 RUN python -m spacy download xx_ent_wiki_sm
 RUN python -m spacy download de_core_news_sm
 
+COPY setup.py .
+RUN python setup.py
+RUN rm -f setup.py
+
 ENV PYTHONPATH=$PYTHONPATH:/
 
-ENTRYPOINT ["python", "main.py"]
+ENTRYPOINT ["python", "/QAChat/Data_Processing/main.py"]
+

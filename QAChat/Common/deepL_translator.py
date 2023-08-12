@@ -8,15 +8,11 @@ import os
 import deepl
 import spacy
 import xx_ent_wiki_sm
-from dotenv import load_dotenv
 from spacy import Language
 from spacy_langdetect import LanguageDetector
 
-from get_tokens import get_tokens_path
-
 DEEPL_TOKEN = os.getenv("DEEPL_TOKEN")
 if DEEPL_TOKEN is None:
-    load_dotenv(get_tokens_path())
     DEEPL_TOKEN = os.getenv("DEEPL_TOKEN")
 
 
