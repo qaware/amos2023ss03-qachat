@@ -93,18 +93,31 @@ Go to the [Docker Website](https://docs.docker.com/engine/install/) and follow t
 
 ### 5. Add the tokens to the project
 
-Create a file called "tokens.env" in the root directory of the project. In this file add the following tokens:
+Create a .txt file for your blacklist, for instance "blacklist.txt". You can put it wherever you want, but make sure to remember the path. It should look like this (first line included): 
+
+
+    
+```` bash
+Identifier; Note
+<URL_TO_THE_CONFLUENCE_PAGE_OR_SPACE>; <NOTE>
+````
+The identifier is the URL to the Confluence page or space. The note is why this page or space is blacklisted. If you do not need a note, write "None" instead.
+
+The next step is to create a file called "tokens.env" in the root directory of the project. In this file add the following tokens (without comments):
 
 ```` bash
 # Slack Tokens
-SLACK_TOKEN = <YOUR_SLACK_TOKEN>
-SLACK_APP_TOKEN = <YOUR_SLACK_APP_TOKEN>
-SIGNING_SECRET = <YOUR_SLACK_SIGNING_SECRET>
+SLACK_TOKEN=<YOUR_SLACK_TOKEN>
+SLACK_APP_TOKEN=<YOUR_SLACK_APP_TOKEN>
+SIGNING_SECRET=<YOUR_SLACK_SIGNING_SECRET>
 
 # Confluence Tokens
-CONFLUENCE_ADRESS = <YOUR_CONFLUENCE_ADRESS>
-CONFLUENCE_USERNAME = <YOUR_CONFLUENCE_USERNAME>
-CONFLUENCE_TOKEN = <YOUR_CONFLUENCE_TOKEN>
+CONFLUENCE_ADRESS=<YOUR_CONFLUENCE_ADRESS>
+CONFLUENCE_USERNAME=<YOUR_CONFLUENCE_USERNAME>
+CONFLUENCE_TOKEN=<YOUR_CONFLUENCE_TOKEN>
+BLACKLIST_PATH=<PATH_TO_THE_BLACKLIST_FILE>
+CONFLUENCE_SPACE_WHITELIST = <YOUR_CONFLUENCE_SPACE_WHITELIST> # seperated by "," (for instance "space1,space2,space3")
+
 
 # Google Cloud Token (for instance http://localhost:8080)
 GOOGLE_CLOUD_QA_TOKEN = <YOUR_GOOGLE_CLOUD_QA_TOKEN>
@@ -115,7 +128,7 @@ WEAVIATE_URL = <YOUR_WEAVIATE_URL>
 # DeepL Token
 DEEPL_TOKEN = <YOUR_DEEPL_TOKEN>
 ````
-
+<!-- TODO: Whitelist and Blacklist -->
 **NOTE**
 Make sure that the Google Cloud QA Token is different from the Weaviate Token.
 <!-- TODO: Add the tokens to the project -->

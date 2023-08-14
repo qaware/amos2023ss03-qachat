@@ -31,11 +31,14 @@ class DataSource(Enum):
     DUMMY = "dummy"
 
 class DataInformation:
-    def __init__(self, id: str, last_changed: datetime, typ: DataSource, text: str):
+    def __init__(self, id: str, last_changed: datetime, typ: DataSource, text: str, title: str = None, space: str = None):
         self.id = id
         self.last_changed = last_changed
         self.typ = typ
         self.text = text
+
+        self.title = title
+        self.space = space
 
 
 class DocumentEmbedder:
