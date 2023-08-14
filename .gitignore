@@ -272,7 +272,7 @@ fabric.properties
 
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
-
+QAChat/Common/blacklist.txt
 tokens.env
 unusedTokens.env
 QAChat/Data_Processing/client_secrets.json
@@ -287,3 +287,6 @@ credentials_file.json
 weaviate_data
 huggingface_data
 torch_data
+
+data/
+

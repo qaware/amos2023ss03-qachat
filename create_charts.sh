@@ -8,7 +8,6 @@ while IFS= read -r line || [ -n "$line" ]; do
     export "$line"
 done < "$env_file"
 
-venv/bin/python3 ${PWD}/QAChat/Data_Processing/main.py
+venv/bin/python3 ${PWD}/QAChat/Data_Processing/confluence_statistic.py
 
-# Initialize the data for the database if it is not already initialized
-
+# NOTE: This script opens a extra window to display the charts. To see the the next chart, close the current window.

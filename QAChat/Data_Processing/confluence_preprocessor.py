@@ -9,11 +9,11 @@ from typing import List
 import re
 
 import requests
-from weaviate.embedded import EmbeddedOptions
 import weaviate
 from atlassian import Confluence
 from bs4 import BeautifulSoup
 
+from QAChat.Common.blacklist_reader import Blacklist, read_blacklist_items
 from QAChat.Data_Processing.google_doc_preprocessor import GoogleDocPreProcessor
 from data_preprocessor import DataPreprocessor
 from document_embedder import DataInformation, DataSource
@@ -25,7 +25,7 @@ CONFLUENCE_ADDRESS = os.getenv("CONFLUENCE_ADDRESS")
 CONFLUENCE_USERNAME = os.getenv("CONFLUENCE_USERNAME")
 CONFLUENCE_TOKEN = os.getenv("CONFLUENCE_TOKEN")
 
-CONFLUENCE_SPACE_WHITELIST = os.getenv("CONFLUENCE_SPACE_WHITELIST").split(", ")
+CONFLUENCE_SPACE_WHITELIST = os.getenv("CONFLUENCE_SPACE_WHITELIST").split(",")
 
 # Get Weaviate URL from environment variables
 WEAVIATE_URL = os.getenv("WEAVIATE_URL")
@@ -54,19 +54,17 @@ class ConfluencePreprocessor(DataPreprocessor):
         self.pdf_reader = PDFReader()
 
     def init_blacklist(self):
-        # Retrieve blacklist data from Supabase table
-        blacklist = self.weaviate_client.query.get(
-            "BlackList", ["identifier", "note"]
-        ).do()["data"]["Get"]["BlackList"]
+        # Retrieve blacklist data from file
+        blacklist = read_blacklist_items()
 
         # Extract restricted spaces and restricted pages from the blacklist data
         for entries in blacklist:
-            if "/pages/" in entries["identifer"]:
+            if "/pages/" in entries.identifier:
                 # Split by slash and get the page id, https://.../pages/PAGE_ID
-                self.restricted_pages.append(entries["identifer"].split("/")[7])
+                self.restricted_pages.append(entries.identifier.split("/")[7])
             else:
                 # Split by slash and get the space name, https://.../space/SPACE_NAME
-                self.restricted_spaces.append(entries["identifer"].split("/")[5])
+                self.restricted_spaces.append(entries.identifier.split("/")[5])
 
     def get_all_spaces(self):
         start = 0
@@ -84,19 +82,18 @@ class ConfluencePreprocessor(DataPreprocessor):
             spaces_data = self.confluence.get_all_spaces(
                 start=start, limit=limit, expand=None
             )
-
             for space in spaces_data["results"]:
                 # exclude personal/user spaces only global spaces
                 if space["type"] == "global":
                     # exclude blacklisted spaces
-                    if space["key"] not in self.restricted_spaces and space["key"] in CONFLUENCE_SPACE_WHITELIST :
-                            self.all_spaces.append(space)
+                    if space["key"] not in self.restricted_spaces and space["key"] in CONFLUENCE_SPACE_WHITELIST:
+                        self.all_spaces.append(space)
 
             # Check if there are more spaces
             if len(spaces_data) < limit:
                 break
             start = start + limit
-        self.all_spaces
+        return self.all_spaces
 
     def get_all_page_ids_from_spaces(self):
         # Get all pages from a space
@@ -137,7 +134,6 @@ class ConfluencePreprocessor(DataPreprocessor):
             # Set final parameters for DataInformation
             last_changed = self.get_last_modified_formated_date(page_info)
             text = self.get_raw_text_from_page(page_with_body)
-            print(f"Länge {page_id}: %d \n" % len(text))
 
             # get googledoc url:
             urls = re.findall(r"https?://docs\.google\.com\S+", text)
@@ -158,7 +154,7 @@ class ConfluencePreprocessor(DataPreprocessor):
                 # + " " + google_doc_content
                 + " " + pdf_content,
             )
-
+            # print(f"Länge {page_id}: %d \n" % len(text))
             # Add Page content to list of DataInformation
             self.all_page_information.append(
                 DataInformation(
@@ -166,6 +162,8 @@ class ConfluencePreprocessor(DataPreprocessor):
                     last_changed=last_changed,
                     typ=DataSource.CONFLUENCE,
                     text=text,
+                    title=page_info["title"],
+                    space=page_info["space"]["key"]
                 )
             )
 
@@ -236,7 +234,7 @@ class ConfluencePreprocessor(DataPreprocessor):
                 for attachment in attachments:
                     if "application/pdf" == attachment["extensions"]["mediaType"]:
                         download_link = (
-                            self.confluence.url + attachment["_links"]["download"]
+                                self.confluence.url + attachment["_links"]["download"]
                         )
                         r = requests.get(
                             download_link,
@@ -250,7 +248,7 @@ class ConfluencePreprocessor(DataPreprocessor):
         return pdf_content
 
     def load_preprocessed_data(
-        self, end_of_timeframe: datetime, start_of_timeframe: datetime
+            self, end_of_timeframe: datetime, start_of_timeframe: datetime
     ) -> List[DataInformation]:
         self.init_lookup_tables()
         self.init_blacklist()
@@ -295,14 +293,14 @@ class ConfluencePreprocessor(DataPreprocessor):
         for i in self.all_page_information:
             if i.id in self.last_update_lookup:  # if page is already in DB
                 if (
-                    i.last_changed > self.last_update_lookup[i.id]
+                        i.last_changed > self.last_update_lookup[i.id]
                 ):  # if there is a change in the page
                     self.remove_from_db(i.id)  # remove from DB
                     self.last_update_lookup[
                         i.id
                     ] = None  # make the dict's entry None -> To detect remove page
                 elif (
-                    i.last_changed == self.last_update_lookup[i.id]
+                        i.last_changed == self.last_update_lookup[i.id]
                 ):  # if no change in the page
                     to_delete.append(i)  # append in the list
                     self.last_update_lookup[
@@ -316,7 +314,7 @@ class ConfluencePreprocessor(DataPreprocessor):
 
         for i in self.last_update_lookup:
             if (
-                self.last_update_lookup[i] is not None
+                    self.last_update_lookup[i] is not None
             ):  # check which entry is not None -> Page is deleted from website
                 self.remove_from_db(i)  # remove it from DB
 
@@ -332,6 +330,43 @@ class ConfluencePreprocessor(DataPreprocessor):
                 },
             )
 
+    def create_whitelist(self):
+        spaces = self.get_all_pages_for_whitelist()
+        output = ""  # TODO: current output for the whitelist (should be written to a file)
+        for space in spaces:
+            output += space["key"] + ","
+        print(output)
+    def get_all_pages_for_whitelist(self):
+        start = 0
+        limit = 500
+
+        whitelist = []
+        # Get all spaces first
+        while True:
+            # url:      to the confluence parameter
+            # username: to your email used in confluence
+            # password: if confluence is cloud set Confluence API Token https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/
+            #           if confluence is server set your password
+            # cloud:    True if confluence is cloud version
+
+            # Get all confluence spaces from the confluence instance
+            spaces = self.confluence.get_all_spaces(
+                start=start, limit=limit, expand=None
+            )
+
+            for space in spaces["results"]:
+                # exclude personal/user spaces only global spaces
+                if space["type"] == "global":
+                    # exclude blacklisted spaces
+                    if space["key"] not in self.restricted_spaces and space["key"].startswith("QAWARE") or space["key"].startswith("QAware"):
+                        whitelist.append(space)
+
+            # Check if there are more spaces
+            if len(spaces) < limit:
+                break
+            start = start + limit
+        return whitelist
+
 
 if __name__ == "__main__":
     cp = ConfluencePreprocessor()
@@ -343,8 +378,13 @@ if __name__ == "__main__":
         datetime.now(), datetime.strptime(date_string, format_string)
     )
     for i in z:
+        print(i.space)
         print(i.id)
+        print(i.title)
         print(i.text)
+        print(len(i.text))
         print(i.typ)
         print(i.last_changed)
         print("----" * 5)
+
+    cp.create_whitelist()

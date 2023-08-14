@@ -32,16 +32,16 @@ def init_db(weaviate_client):
             }
         )
 
-    if not weaviate_client.schema.exists("BlackList"):
-        weaviate_client.schema.create_class(
-            {
-                "class": "BlackList",
-                "properties": [
-                    {"name": "identifier", "dataType": ["string"]},
-                    {"name": "note", "dataType": ["string"]},
-                ],
-            }
-        )
+    # if not weaviate_client.schema.exists("BlackList"):
+    #     weaviate_client.schema.create_class(
+    #         {
+    #             "class": "BlackList",
+    #             "properties": [
+    #                 {"name": "identifier", "dataType": ["string"]},
+    #                 {"name": "note", "dataType": ["string"]},
+    #             ],
+    #         }
+    #     )
 
     if not weaviate_client.schema.exists("LoadedChannels"):
         weaviate_client.schema.create_class(
@@ -59,10 +59,10 @@ def clear_db(weaviate_client):
     return weaviate_client.schema.delete_all()
 
 
-def add_entry_to_black_list(weaviate_client, identifier, note=None):
-    return weaviate_client.data_object.create(
-        {"identifier": identifier, "note": note}, "BlackList"
-    )
+# def add_entry_to_black_list(weaviate_client, identifier, note=None):
+#     return weaviate_client.data_object.create(
+#         {"identifier": identifier, "note": note}, "BlackList"
+#     )
 
 
 if __name__ == "__main__":
