@@ -252,6 +252,14 @@ class QABot:
         print(context["content"])
         print(context["metadata"])
         print(f"Context: {context}")
+        links = []
+        for metadata in context["metadata"]:
+            if metadata["link"] in links:
+                break
+            links.append(metadata["link"])
+        if handler is not None:
+            handler.send_links(links)
+        print(f"Links: {links}")
         answer = self.answer_question_with_context(
             question, context["content"], handler
         )

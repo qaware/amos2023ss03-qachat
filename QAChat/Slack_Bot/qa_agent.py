@@ -40,7 +40,17 @@ class QAAgent(BaseAgent):
 
         try:
             for answer in self.api_interface.request(question):
-                asynchronous_processor.add(answer)
+                # check if answer is a tuple
+                if not isinstance(answer, tuple):
+                    answer = (answer, ["https://www.google.com", "https://www.computer.org"])
+                text, links = answer
+                if text and links:
+                    message = text + "\n" + "\nFor more information visit:\n" + "\n".join(links)
+                    asynchronous_processor.add(message)
+                elif text:
+                    asynchronous_processor.add(text)
+                elif links:
+                    asynchronous_processor.add("\nFor more information visit:\n".join(links))
         except Exception as e:
             asynchronous_processor.add(f":warning: Something went wrong while processing your request. Please try again later.\n```{e}```\nIf the problem persists, please contact the bot administrator for assistance.`")
             traceback.print_exc()
