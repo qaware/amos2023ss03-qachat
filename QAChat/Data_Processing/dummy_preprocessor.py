@@ -24,6 +24,7 @@ class DummyPreprocessor(DataPreprocessor):
                     last_changed=datetime(2021, 1, 1),
                     typ=DataSource.DUMMY,
                     text=row["Answer"],
+                    link="https://www.google.com",
                 )
             )
 

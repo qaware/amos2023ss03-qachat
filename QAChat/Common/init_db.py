@@ -18,6 +18,7 @@ def init_db(weaviate_client):
                     {"name": "type", "dataType": ["string"]},
                     {"name": "last_changed", "dataType": ["string"]},
                     {"name": "text", "dataType": ["string"]},
+                    {"name": "link", "dataType": ["string"]},
                 ],
             }
         )
