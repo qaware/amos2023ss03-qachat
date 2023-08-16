@@ -14,7 +14,7 @@ class Statistic:
         format_string = "%Y-%m-%d"
 
         self.data = self.processor.load_preprocessed_data(
-            datetime.now(), datetime.strptime(date_string, format_string)
+            datetime.now(), datetime.strptime(date_string, format_string), True
         )
         self.spaces = self.processor.all_spaces
         self.statistic = []

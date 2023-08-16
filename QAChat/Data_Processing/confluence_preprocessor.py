@@ -156,6 +156,8 @@ class ConfluencePreprocessor(DataPreprocessor):
             )
             # print(f"Länge {page_id}: %d \n" % len(text))
             # Add Page content to list of DataInformation
+            print(page_info["_links"]["base"] + page_info["_links"]["webui"].split("overview")[
+                0])
             self.all_page_information.append(
                 DataInformation(
                     id=page_id,
@@ -163,7 +165,8 @@ class ConfluencePreprocessor(DataPreprocessor):
                     typ=DataSource.CONFLUENCE,
                     text=text,
                     title=page_info["title"],
-                    space=page_info["space"]["key"]
+                    space=page_info["space"]["key"],
+                    link=page_info["_links"]["base"] + page_info["_links"]["webui"].split("overview")[0],
                 )
             )
 
@@ -248,14 +251,15 @@ class ConfluencePreprocessor(DataPreprocessor):
         return pdf_content
 
     def load_preprocessed_data(
-            self, end_of_timeframe: datetime, start_of_timeframe: datetime
+            self, end_of_timeframe: datetime, start_of_timeframe: datetime, statistic: bool = False
     ) -> List[DataInformation]:
         self.init_lookup_tables()
         self.init_blacklist()
         self.get_all_spaces()
         self.get_all_page_ids_from_spaces()
         self.get_relevant_data_from_pages()
-        self.filter_pages()
+        if not statistic:
+            self.filter_pages()
         return [data for data in self.all_page_information]
 
     def init_lookup_tables(self):
@@ -336,6 +340,7 @@ class ConfluencePreprocessor(DataPreprocessor):
         for space in spaces:
             output += space["key"] + ","
         print(output)
+
     def get_all_pages_for_whitelist(self):
         start = 0
         limit = 500

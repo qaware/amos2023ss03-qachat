@@ -24,14 +24,16 @@ from QAChat.Data_Processing.text_transformer import transform_text_to_chunks
 # Get WEAVIATE_URL
 WEAVIATE_URL = os.getenv("WEAVIATE_URL")
 
+
 class DataSource(Enum):
     SLACK = "slack"
     CONFLUENCE = "confluence"
     DRIVE = "drive"
     DUMMY = "dummy"
 
+
 class DataInformation:
-    def __init__(self, id: str, last_changed: datetime, typ: DataSource, text: str, title: str = None, space: str = None):
+    def __init__(self, id: str, last_changed: datetime, typ: DataSource, text: str, title: str = None, space: str = None, link: str = None):
         self.id = id
         self.last_changed = last_changed
         self.typ = typ
@@ -39,6 +41,7 @@ class DataInformation:
 
         self.title = title
         self.space = space
+        self.link = link
 
 
 class DocumentEmbedder:
@@ -146,6 +149,7 @@ class DocumentEmbedder:
                         "type": typ.value,
                         "last_changed": data.last_changed.isoformat(),
                         "text": data.text,
+                        "link": data.link,
                     }
                     for data in all_changed_data
                 ],
