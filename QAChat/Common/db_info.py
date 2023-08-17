@@ -108,5 +108,5 @@ def wrap_text(text, max_width):
 
 
 if __name__ == "__main__":
-    print_content_length(*sys.argv[1:])
     print_index_content(*sys.argv[1:])
+    print_content_length(*sys.argv[1:])

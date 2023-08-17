@@ -20,6 +20,7 @@ from QAChat.Slack_Bot.qa_bot_api_interface import QABotAPIInterface
 SLACK_TOKEN = os.getenv("SLACK_TOKEN")
 SLACK_APP_TOKEN = os.getenv("SLACK_APP_TOKEN")
 
+
 class QAAgent(BaseAgent):
     def __init__(self, app=None, client=None, handler=None, api_interface=None):
         self.app = app or App(token=SLACK_TOKEN)
@@ -42,17 +43,18 @@ class QAAgent(BaseAgent):
             for answer in self.api_interface.request(question):
                 # check if answer is a tuple
                 if not isinstance(answer, tuple):
-                    answer = (answer, ["https://www.google.com", "https://www.computer.org"])
+                    answer = (answer, ["https://www.google.com", "https://www.computer.org", "https://www.wikipedia.org"])
                 text, links = answer
                 if text and links:
-                    message = text + "\n" + "\nFor more information visit:\n" + "\n".join(links)
+                    message = text + "\n\nFor more information visit:\n   • " + "\n   • ".join(links)
                     asynchronous_processor.add(message)
                 elif text:
                     asynchronous_processor.add(text)
                 elif links:
                     asynchronous_processor.add("\nFor more information visit:\n".join(links))
         except Exception as e:
-            asynchronous_processor.add(f":warning: Something went wrong while processing your request. Please try again later.\n```{e}```\nIf the problem persists, please contact the bot administrator for assistance.`")
+            asynchronous_processor.add(
+                f":warning: Something went wrong while processing your request. Please try again later.\n```{e}```\nIf the problem persists, please contact the bot administrator for assistance.`")
             traceback.print_exc()
             print(e)
         asynchronous_processor.end()

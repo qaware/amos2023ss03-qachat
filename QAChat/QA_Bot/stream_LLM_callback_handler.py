@@ -30,4 +30,6 @@ class StreamLLMCallbackHandler(BaseCallbackHandler):
         #     text = self.translator.translate_to(
         #         text, self.lang, use_spacy_to_detect_lang_if_needed=False
         #     ).text
+        if(text == self.links):
+            text = ""
         return json.dumps({"text": text, "links": self.links}) + "\n"
