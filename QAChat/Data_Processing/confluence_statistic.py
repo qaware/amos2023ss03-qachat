@@ -85,10 +85,16 @@ class Statistic:
         for space in self.statistic:
 
             if (space["space_name"] == "QAWAREBOS" or space[
-                "space_name"] == "QAWARETI"):  # Check if the space is the QAWAREBOS space (it has a lot of pages)
+                "space_name"] == "QAWARETI" or space[
+                "space_name"] == "QAWARECOMMUNITY"):  # Check if the space is the QAWAREBOS space (it has a lot of pages)
                 figsize = (12 * 2, 8 * 2)  # Set the figure size to 12x8 inches
+                title_font_size = 15
+            elif space["space_name"] == "QAWAREKREISE":
+                figsize = (12 * 3, 8 * 3)
+                title_font_size = 25
             else:
                 figsize = (12, 8)
+                title_font_size = 10
             fig, ax1 = plt.subplots(figsize=figsize)  # Set the figure size to 12x8 inches
 
             # Filter the pages to only include the pages of the current space
@@ -126,7 +132,7 @@ class Statistic:
             ax2.legend(loc='center right')
 
             # Set the title of the chart
-            ax1.set_title(f"Number of characters and cost for pages in {space['space_name']}")
+            ax1.set_title(f"Number of characters and cost for pages in {space['space_name']}", fontsize=title_font_size)
 
             # Adjust the spacing between the subplots
             plt.tight_layout()
@@ -187,7 +193,6 @@ class Statistic:
 
     def style_chart(self):
         pass
-
 
 
 if __name__ == "__main__":

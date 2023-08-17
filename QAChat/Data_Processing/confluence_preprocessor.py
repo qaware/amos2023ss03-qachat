@@ -156,8 +156,7 @@ class ConfluencePreprocessor(DataPreprocessor):
             )
             # print(f"Länge {page_id}: %d \n" % len(text))
             # Add Page content to list of DataInformation
-            print(page_info["_links"]["base"] + page_info["_links"]["webui"].split("overview")[
-                0])
+            # print(page_info["_links"]["base"] + page_info["_links"]["webui"].split("overview")[0])
             self.all_page_information.append(
                 DataInformation(
                     id=page_id,
@@ -247,7 +246,12 @@ class ConfluencePreprocessor(DataPreprocessor):
                         if r.status_code == 200:
                             pdf_bytes = io.BytesIO(r.content).read()
 
-                            pdf_content += self.pdf_reader.read_pdf(pdf_bytes) + " "
+                            try:
+                                pdf_content += self.pdf_reader.read_pdf(pdf_bytes) + " "
+                            except Exception as e:
+                                print(f"Error while reading pdf: {e}")
+                                print(f"Page id: {page_id}, Attachment: {attachment['title']}, Link: {download_link}, Space: {self.all_page_information[-1].space}")
+                                continue
         return pdf_content
 
     def load_preprocessed_data(

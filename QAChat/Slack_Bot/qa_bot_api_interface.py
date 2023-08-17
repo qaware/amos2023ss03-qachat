@@ -16,11 +16,15 @@ class QABotAPIInterface:
                 if line:
                     decoded_line = line.decode("utf-8")
                     data = json.loads(decoded_line)
-                    if "text" in data: 
-                        yield data["text"]
+                    if "text" in data and "links" in data:
+                        yield str(data["text"]), data["links"]
+                    elif "text" in data:
+                        yield str(data["text"]), None
+                    elif "links" in data:
+                        yield None, data["links"]
                     else:
-                        print("No text in data")
-                        raise Exception("The response from the API did not contain any text.")
+                        print("No text or links in data")
+                        raise Exception("The response from the API did not contain any text or links.")
 
         except requests.exceptions.Timeout:
             print("Timeout")
