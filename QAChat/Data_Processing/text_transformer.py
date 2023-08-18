@@ -8,8 +8,8 @@ import nltk
 
 from QAChat.Common.deepL_translator import DeepLTranslator
 
-CHUNK_SIZE = 200
-CHUNK_OVERLAP = 50
+CHUNK_SIZE = 2000
+CHUNK_OVERLAP = 200
 
 
 def transform_text_to_chunks(data_information_list):
@@ -21,18 +21,18 @@ def transform_text_to_chunks(data_information_list):
     """
 
     new_data_information_list = []
-    # translator = DeepLTranslator() # TODO: uncomment this line to enable translation
+    translator = DeepLTranslator() # TODO: uncomment this line to enable translation
     for data_information in data_information_list:
         # translate text
 
-        # data_information.text = (
-        #     translator.translate_to(data_information.text, "EN-US")
-        #     .text.replace("<name>", "")
-        #     .replace("</name>", "")
-        # ) # TODO: uncomment this line to enable translation
         data_information.text = (
-            data_information.text.replace("<name>", "").replace("</name>", "")
-        )
+            translator.translate_to(data_information.text, "EN-US")
+            .text.replace("<name>", "")
+            .replace("</name>", "")
+        ) # TODO: uncomment this line to enable translation
+        # data_information.text = (
+        #     data_information.text.replace("<name>", "").replace("</name>", "")
+        # )
 
         # split the text
         nltk.download("punkt", quiet=True)

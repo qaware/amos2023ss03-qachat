@@ -40,7 +40,7 @@ class ConfluencePreprocessor(DataPreprocessor):
             cloud=True,
         )
         self.pdf_reader = PDFReader()
-        self.all_spaces = []
+        self.__all_spaces = []
         self.all_pages_id = []
         self.all_page_information = []
         self.restricted_pages = []
@@ -69,7 +69,9 @@ class ConfluencePreprocessor(DataPreprocessor):
     def get_all_spaces(self):
         start = 0
         limit = 500
-
+        all_spaces = []
+        if len(self.__all_spaces) > 0:
+            return self.__all_spaces
         # Get all spaces first
         while True:
             # url:      to the confluence parameter
@@ -87,17 +89,17 @@ class ConfluencePreprocessor(DataPreprocessor):
                 if space["type"] == "global":
                     # exclude blacklisted spaces
                     if space["key"] not in self.restricted_spaces and space["key"] in CONFLUENCE_SPACE_WHITELIST:
-                        self.all_spaces.append(space)
+                        all_spaces.append(space)
 
             # Check if there are more spaces
             if len(spaces_data) < limit:
                 break
             start = start + limit
-        return self.all_spaces
+        return all_spaces
 
     def get_all_page_ids_from_spaces(self):
         # Get all pages from a space
-        for space in self.all_spaces:
+        for space in self.__all_spaces:
             start = 0
             limit = 100
 
@@ -124,13 +126,13 @@ class ConfluencePreprocessor(DataPreprocessor):
         # Get all relevant information from each page
         for page_id in self.all_pages_id:
             # Get page by id
+
             page_with_body = self.confluence.get_page_by_id(
                 page_id, expand="body.storage, version", status=None, version=None
             )
             page_info = self.confluence.get_page_by_id(
                 page_id, expand=None, status=None, version=None
             )
-
             # Set final parameters for DataInformation
             last_changed = self.get_last_modified_formated_date(page_info)
             text = self.get_raw_text_from_page(page_with_body)
@@ -143,7 +145,7 @@ class ConfluencePreprocessor(DataPreprocessor):
             # google_doc_content = self.get_content_from_google_drive(urls)
 
             # get content from confluence attachments
-            pdf_content = self.get_content_from_page_attachments(page_id)
+            pdf_content = "" # self.get_content_from_page_attachments(page_id)
 
             # replace consecutive occurrences of \n into one space
             text = re.sub(
@@ -234,6 +236,7 @@ class ConfluencePreprocessor(DataPreprocessor):
 
             if len(attachments) > 0:
                 for attachment in attachments:
+
                     if "application/pdf" == attachment["extensions"]["mediaType"]:
                         download_link = (
                                 self.confluence.url + attachment["_links"]["download"]
@@ -248,9 +251,12 @@ class ConfluencePreprocessor(DataPreprocessor):
 
                             try:
                                 pdf_content += self.pdf_reader.read_pdf(pdf_bytes) + " "
+                                print(
+                                    f"Content: {pdf_content}, Page id: {page_id}, Attachment: {attachment['title']}, Link: {download_link}, Space: {self.all_page_information[-1].space}")
                             except Exception as e:
                                 print(f"Error while reading pdf: {e}")
-                                print(f"Page id: {page_id}, Attachment: {attachment['title']}, Link: {download_link}, Space: {self.all_page_information[-1].space}")
+                                print(
+                                    f"Page id: {page_id}, Attachment: {attachment['title']}, Link: {download_link}, Space: {self.all_page_information[-1].space}")
                                 continue
         return pdf_content
 
@@ -259,11 +265,10 @@ class ConfluencePreprocessor(DataPreprocessor):
     ) -> List[DataInformation]:
         self.init_lookup_tables()
         self.init_blacklist()
-        self.get_all_spaces()
+        self.__all_spaces = self.get_all_spaces()
         self.get_all_page_ids_from_spaces()
         self.get_relevant_data_from_pages()
-        if not statistic:
-            self.filter_pages()
+        self.filter_pages()
         return [data for data in self.all_page_information]
 
     def init_lookup_tables(self):
@@ -304,9 +309,7 @@ class ConfluencePreprocessor(DataPreprocessor):
                         i.last_changed > self.last_update_lookup[i.id]
                 ):  # if there is a change in the page
                     self.remove_from_db(i.id)  # remove from DB
-                    self.last_update_lookup[
-                        i.id
-                    ] = None  # make the dict's entry None -> To detect remove page
+                    self.last_update_lookup[i.id] = None  # make the dict's entry None -> To detect remove page
                 elif (
                         i.last_changed == self.last_update_lookup[i.id]
                 ):  # if no change in the page
@@ -314,6 +317,9 @@ class ConfluencePreprocessor(DataPreprocessor):
                     self.last_update_lookup[
                         i.id
                     ] = None  # make the dict's entry None -> To detect remove page
+            if i.last_changed.year >= 2022:
+                to_delete.append(i)
+
 
         for i in to_delete:
             self.all_page_information.remove(
@@ -340,7 +346,7 @@ class ConfluencePreprocessor(DataPreprocessor):
 
     def create_whitelist(self):
         spaces = self.get_all_pages_for_whitelist()
-        output = ""  # TODO: current output for the whitelist (should be written to a file)
+        output = ""  # TODO: current output for the whitelist
         for space in spaces:
             output += space["key"] + ","
         print(output)
@@ -367,7 +373,8 @@ class ConfluencePreprocessor(DataPreprocessor):
                 # exclude personal/user spaces only global spaces
                 if space["type"] == "global":
                     # exclude blacklisted spaces
-                    if space["key"] not in self.restricted_spaces and space["key"].startswith("QAWARE") or space["key"].startswith("QAware"):
+                    if space["key"] not in self.restricted_spaces and space["key"].startswith("QAWARE") or space[
+                        "key"].startswith("QAware"):
                         whitelist.append(space)
 
             # Check if there are more spaces

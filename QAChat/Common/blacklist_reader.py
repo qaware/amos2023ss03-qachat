@@ -25,7 +25,7 @@ def read_blacklist_items():
             note = None
         total_blacklist.append(Blacklist(identifier, note))
 
-        return total_blacklist
+    return total_blacklist
 
 
 
