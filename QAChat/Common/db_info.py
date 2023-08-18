@@ -8,7 +8,7 @@ import os
 import re
 import textwrap
 
-LIMIT = 1000
+LIMIT = 1_000
 MAX_TEXT_LENGTH = 150
 
 # Get WEAVIATE_URL

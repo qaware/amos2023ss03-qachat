@@ -46,6 +46,9 @@ class QAAgent(BaseAgent):
                     answer = (answer, ["https://www.google.com", "https://www.computer.org", "https://www.wikipedia.org"])
                 text, links = answer
                 if text and links:
+
+                    # delete all '\n' when there are more than 3 '\n' in a row
+                    text = re.sub(r"(\n){3,}", "\n\n", text)
                     message = text + "\n\nFor more information visit:\n   • " + "\n   • ".join(links)
                     asynchronous_processor.add(message)
                 elif text:

@@ -63,9 +63,9 @@ class QABot:
         if model is None:
             self.model = self.get_llama_model(repo_id=repo_id, filename=filename)
         self.client = weaviate.Client(url=WEAVIATE_URL)
-        # self.translator = translator
-        # if translator is None:
-        #     self.translator = DeepLTranslator()
+        self.translator = translator
+        if translator is None:
+            self.translator = DeepLTranslator()
 
     def get_llama_model(
             self,
@@ -220,10 +220,10 @@ class QABot:
             docs.append({"metadata": metadata, "content": page_content})
         return docs
 
-    # def translate_text(self, question, language="EN-US"):
-    #     return self.translator.translate_to(
-    #         question, language, use_spacy_to_detect_lang_if_needed=False
-    #     )
+    def translate_text(self, question, language="EN-US"):
+        return self.translator.translate_to(
+            question, language, use_spacy_to_detect_lang_if_needed=False
+        )
 
     def answer_question(self, question: str, handler: StreamLLMCallbackHandler | None):
         """
@@ -242,12 +242,12 @@ class QABot:
         """
 
         print(f"Receive Question: {question}")
-        # translation = self.translate_text(question)
-        # if handler is not None:
-        #     handler.lang = translation.detected_source_lang
+        translation = self.translate_text(question)
+        if handler is not None:
+            handler.lang = translation.detected_source_lang
 
-        # translated_question = translation.text
-        print(f"Translation: {question}")
+        translated_question = translation.text
+        print(f"Translation: {translated_question}")
         context = self.__sim_search(question)
         print(context["content"])
         print(context["metadata"])
@@ -264,8 +264,8 @@ class QABot:
             question, context["content"], handler
         )
         print(f"Answer: {answer}")
-        # if translation.detected_source_lang != "EN-US":
-        #     answer = self.translate_text(answer, translation.detected_source_lang).text
+        if translation.detected_source_lang != "EN-US":
+            answer = self.translate_text(answer, translation.detected_source_lang).text
 
         print(f"Translated answer: {answer}")
         return {

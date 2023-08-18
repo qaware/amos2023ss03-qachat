@@ -44,9 +44,14 @@ class DeepLTranslator:
             ):
                 return Result(text, "EN_US")
 
-        result = self.translator.translate_text(
-            text, target_lang=target_lang, ignore_tags="name"
-        )
+        try:
+            result = self.translator.translate_text(
+                text, target_lang=target_lang, ignore_tags="name"
+            )
+        except Exception as e:
+            print(e)
+            print("Error while translating text: " + text)
+            return Result(text, "EN-US")
         if result.detected_source_lang == "EN":
             result.detected_source_lang = "EN-US"
         elif result.detected_source_lang == "PT":

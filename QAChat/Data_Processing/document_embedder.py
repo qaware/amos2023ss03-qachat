@@ -60,9 +60,7 @@ class DocumentEmbedder:
         )
 
         # name identification
-        # todo: no download if already downloaded --> it is always downloading, when the object is called? -
-        #  -> downloads are already satisfied but it still loads it (if the dummy data is longer it need more "downloads";
-        #  it seem to be in the transformer)
+
 
         spacy.cli.download("xx_ent_wiki_sm")
         spacy.load("xx_ent_wiki_sm")
