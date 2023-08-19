@@ -6,6 +6,7 @@
 
 from time import time
 
+from deepl import TextResult
 from huggingface_hub import hf_hub_download
 from langchain import LlamaCpp, PromptTemplate
 
@@ -83,14 +84,15 @@ class QABot:
             "{context_str}\n\n"
             "Try your best to answer based on the given context, and avoid creating new information. If the context does not provide enough details to formulate a response, or if you are unsure, kindly state that you can't provide a certain answer.\n"
             "\n\n"
-            "USER: {question}"
+            "USER: {question}\n"
             "ASSISTANT:"
         )
         prompt = PromptTemplate(
-            template=template, input_variables=["question", "context_str"]
+            template=template,
+            input_variables=["question", "context_str"]
         )
 
-        print(prompt.format_prompt(question=question, context_str=context_str))
+        print(prompt.format_prompt(question=question, context_str=context_str).to_string())
         answer = self.model.generate_prompt(
             [
                 prompt.format_prompt(question=question, context_str=context_str),
@@ -100,7 +102,7 @@ class QABot:
         )
         return answer.generations[0][0].text.strip()
 
-    def translate_text(self, question, language="EN-US"):
+    def translate_text(self, question, language="EN-US") -> TextResult:
         return self.translator.translate_to(
             question, language, use_spacy_to_detect_lang_if_needed=False
         )
@@ -122,16 +124,16 @@ class QABot:
         """
 
         print(f"Receive Question: {question}")
-        translation = self.translate_text(question)
-        if handler is not None:
-            handler.lang = translation.detected_source_lang
 
-        translated_question = translation.text
-        print(f"Translation: {translated_question}")
+        #translation = self.translate_text(question)
+        #if handler is not None:
+        #    handler.lang = translation.detected_source_lang
+        #translated_question = translation.text
+        #print(f"Translation: {translated_question}")
+
         context = self.vector_store.sim_search(question)
-        print(context["content"])
-        print(context["metadata"])
-        print(f"Context: {context}")
+        print("Content:" + str(context["content"]))
+
         links = []
         for metadata in context["metadata"]:
             if metadata["link"] in links:
@@ -140,14 +142,15 @@ class QABot:
         if handler is not None:
             handler.send_links(links)
         print(f"Links: {links}")
+
         answer = self.answer_question_with_context(
             question, context["content"], handler
         )
         print(f"Answer: {answer}")
-        if translation.detected_source_lang != "EN-US":
-            answer = self.translate_text(answer, translation.detected_source_lang).text
+        #if translation.detected_source_lang != "EN-US":
+        #    answer = self.translate_text(answer, translation.detected_source_lang).text
+        #print(f"Translated answer: {answer}")
 
-        print(f"Translated answer: {answer}")
         return {
             "answer": answer,
             "question": question,

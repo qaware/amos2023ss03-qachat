@@ -26,10 +26,10 @@ class StreamLLMCallbackHandler(BaseCallbackHandler):
         self.asynchronous_processor.add(self.links)
 
     def send_response(self, text):
-        if self.lang != "EN-US":
-            text = self.translator.translate_to(
-                text, self.lang, use_spacy_to_detect_lang_if_needed=False
-            ).text
+        #if self.lang != "EN-US":
+        #    text = self.translator.translate_to(
+        #        text, self.lang, use_spacy_to_detect_lang_if_needed=False
+        #    ).text
         if text == self.links:
             text = ""
         return json.dumps({"text": text, "links": self.links}) + "\n"
