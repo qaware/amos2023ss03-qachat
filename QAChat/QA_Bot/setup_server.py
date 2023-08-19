@@ -11,11 +11,13 @@ from qa_bot import QABot
 app = Flask(__name__)
 qa_bot = QABot()
 
+print("Init Lock")
+from threading import Lock
+critical_function_lock = Lock()
 
 @app.route("/", methods=["POST"])
 def calculate():
-    lock = asyncio.Lock()
-    async with lock:
+    with critical_function_lock:
         handler = StreamLLMCallbackHandler()
 
         data = request.get_json()
