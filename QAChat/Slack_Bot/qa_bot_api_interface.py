@@ -13,7 +13,7 @@ class QABotAPIInterface:
             raise Exception("QA_BOT_URL not set")
 
         try:
-            response = requests.post(url, json={"question": question}, stream=True, timeout=20) # timeout in seconds, default is 20 seconds, throw exception if timeout
+            response = requests.post(url, json={"question": question}, stream=True, timeout=40) # timeout in seconds, default is 20 seconds, throw exception if timeout
             for line in response.iter_lines():
             # filter out keep-alive new lines
                 if line:
