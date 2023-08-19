@@ -6,8 +6,8 @@
 import os
 
 import deepl
-import spacy
 import xx_ent_wiki_sm
+from deepl import TextResult
 from spacy import Language
 from spacy_langdetect import LanguageDetector
 
@@ -27,20 +27,20 @@ class DeepLTranslator:
         super().__init__()
         # initialize a DeepL translator service
         self.translator = deepl.Translator(DEEPL_TOKEN)
-        self.muulti_lang_nlp = xx_ent_wiki_sm.load()
+        self.multi_lang_nlp = xx_ent_wiki_sm.load()
         Language.factory("language_detector", func=self.get_lang_detector)
-        if "sentencizer" not in self.muulti_lang_nlp.pipe_names:
-            self.muulti_lang_nlp.add_pipe("sentencizer")
-        if "language_detector" not in self.muulti_lang_nlp.pipe_names:
-            self.muulti_lang_nlp.add_pipe("language_detector", last=True)
+        if "sentencizer" not in self.multi_lang_nlp.pipe_names:
+            self.multi_lang_nlp.add_pipe("sentencizer")
+        if "language_detector" not in self.multi_lang_nlp.pipe_names:
+            self.multi_lang_nlp.add_pipe("language_detector", last=True)
 
-    def translate_to(self, text, target_lang, use_spacy_to_detect_lang_if_needed=True):
+    def translate_to(self, text, target_lang, use_spacy_to_detect_lang_if_needed=True) -> TextResult:
         if use_spacy_to_detect_lang_if_needed:
-            doc = self.muulti_lang_nlp(text)
+            doc = self.multi_lang_nlp(text)
             if (
-                doc._.language["language"] == "en"
-                and doc._.language["score"] > 0.8
-                and target_lang == "EN-US"
+                    doc._.language["language"] == "en"
+                    and doc._.language["score"] > 0.8
+                    and target_lang == "EN-US"
             ):
                 return Result(text, "EN_US")
 

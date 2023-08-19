@@ -9,17 +9,24 @@ from typing import List
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 import weaviate
-from weaviate.embedded import EmbeddedOptions
-from QAChat.Data_Processing.data_preprocessor import DataPreprocessor
-from QAChat.Data_Processing.document_embedder import DataInformation, DataSource
-from QAChat.Common.init_db import init_db
+from QAChat.Data_Processing.preprocessor.data_preprocessor import DataPreprocessor
+from QAChat.Data_Processing.preprocessor.data_information import DataInformation, DataSource
 
 SLACK_TOKEN = os.getenv("SLACK_TOKEN")
+if SLACK_TOKEN is None:
+    raise Exception("SLACK_TOKEN not set")
+
 SLACK_APP_TOKEN = os.getenv("SLACK_APP_TOKEN")
-SIGNING_SECRET = os.getenv("SIGNING_SECRET")
+if SLACK_APP_TOKEN is None:
+    raise Exception("SLACK_APP_TOKEN not set")
+
+SLACK_SIGNING_SECRET = os.getenv("SLACK_SIGNING_SECRET")
+if SLACK_SIGNING_SECRET is None:
+    raise Exception("SLACK SIGNING_SECRET not set")
+
 WEAVIATE_URL = os.getenv("WEAVIATE_URL")
-
-
+if WEAVIATE_URL is None:
+    raise Exception("WEAVIATE_URL not set")
 
 class SlackPreprocessor(DataPreprocessor):
     def __init__(self):
@@ -28,7 +35,9 @@ class SlackPreprocessor(DataPreprocessor):
         self.conversation_history = []
         self.count_found_messages = 0
         self.weaviate = weaviate.Client(url=WEAVIATE_URL)
-        init_db(self.weaviate)
+
+    def get_source(self) -> DataSource:
+        return DataSource.SLACK
 
     def __map_users(self):
         for message in self.conversation_history:

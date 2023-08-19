@@ -1,9 +1,8 @@
-import os
 from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 
-from QAChat.Data_Processing.confluence_preprocessor import ConfluencePreprocessor
+from QAChat.Data_Processing.preprocessor.confluence_preprocessor import ConfluencePreprocessor
 
 
 class Statistic:
@@ -14,7 +13,7 @@ class Statistic:
         format_string = "%Y-%m-%d"
 
         self.data = processor.load_preprocessed_data(
-            datetime.now(), datetime.strptime(date_string, format_string), True
+            datetime.now(), datetime.strptime(date_string, format_string)
         )
         self.spaces = processor.get_all_spaces()
         self.statistic = []

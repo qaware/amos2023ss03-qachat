@@ -3,16 +3,19 @@
 # SPDX-FileCopyrightText: 2023 Felix Nützel
 
 import copy
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from typing import List
+
 import nltk
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 from QAChat.Common.deepL_translator import DeepLTranslator
+from QAChat.Data_Processing.preprocessor.data_information import DataInformation
 
-CHUNK_SIZE = 2000
-CHUNK_OVERLAP = 200
+CHUNK_SIZE = 400
+CHUNK_OVERLAP = 50
 
 
-def transform_text_to_chunks(data_information_list):
+def transform_text_to_chunks(data_information_list) -> List[DataInformation]:
     """
     Splits the data information needed for our vector database into chunks.
 
@@ -20,22 +23,19 @@ def transform_text_to_chunks(data_information_list):
     :return: a new data_information_list in which the data was split into chunks with a specific size and overlap
     """
 
+    nltk.download("punkt", quiet=True) # TODO: why?
     new_data_information_list = []
-    translator = DeepLTranslator() # TODO: uncomment this line to enable translation
+    translator = DeepLTranslator()
     for data_information in data_information_list:
-        # translate text
 
-        data_information.text = (
-            translator.translate_to(data_information.text, "EN-US")
-            .text.replace("<name>", "")
-            .replace("</name>", "")
-        ) # TODO: uncomment this line to enable translation
+        # translate text
+        data_information.text = translator.translate_to(data_information.text, "EN-US").text
+
         # data_information.text = (
         #     data_information.text.replace("<name>", "").replace("</name>", "")
         # )
 
         # split the text
-        nltk.download("punkt", quiet=True)
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP
         )
@@ -43,7 +43,7 @@ def transform_text_to_chunks(data_information_list):
         chunks = text_splitter.split_text(data_information.text)
 
         for index, chunk in enumerate(chunks):
-            new_data_information = copy.deepcopy(data_information)
+            new_data_information: DataInformation = copy.deepcopy(data_information)
             new_data_information.text = chunk
             new_data_information.id = data_information.id + "_" + str(index)
             new_data_information_list.append(new_data_information)

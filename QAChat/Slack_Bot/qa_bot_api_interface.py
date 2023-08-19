@@ -8,7 +8,10 @@ import requests
 
 class QABotAPIInterface:
     def request(self, question):
-        url = os.getenv("GOOGLE_CLOUD_QA_BOT")
+        url = os.getenv("QA_BOT_URL")
+        if url is None:
+            raise Exception("QA_BOT_URL not set")
+
         try:
             response = requests.post(url, json={"question": question}, stream=True, timeout=20) # timeout in seconds, default is 20 seconds, throw exception if timeout
             for line in response.iter_lines():
