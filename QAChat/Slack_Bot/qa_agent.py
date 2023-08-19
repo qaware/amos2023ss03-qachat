@@ -48,16 +48,16 @@ class QAAgent(BaseAgent):
                 if not isinstance(answer, tuple):
                     answer = (answer, ["https://www.google.com", "https://www.computer.org", "https://www.wikipedia.org"])
                 text, links = answer
+                message = ""
                 if text and links:
-
                     # delete all '\n' when there are more than 3 '\n' in a row
                     text = re.sub(r"(\n){3,}", "\n\n", text)
                     message = text + "\n\nFor more information visit:\n   • " + "\n   • ".join(links)
-                    asynchronous_processor.add(message)
                 elif text:
-                    asynchronous_processor.add(text)
+                    message = re.sub(r"(\n){3,}", "\n\n", text)
                 elif links:
-                    asynchronous_processor.add("\nFor more information visit:\n".join(links))
+                    message = "...\n\nFor more information visit:\n   • " + "\n   • ".join(links)
+                asynchronous_processor.add(message)
         except Exception as e:
             asynchronous_processor.add(
                 f":warning: Something went wrong while processing your request. Please try again later.\n```{e}```\nIf the problem persists, please contact the bot administrator for assistance.`")
