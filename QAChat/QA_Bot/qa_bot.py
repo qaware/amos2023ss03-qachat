@@ -16,6 +16,10 @@ from QAChat.QA_Bot.stream_LLM_callback_handler import StreamLLMCallbackHandler
 
 from typing import List
 
+print("Init Lock")
+from threading import Lock
+critical_function_lock = Lock()
+
 
 class QABot:
     def __init__(
@@ -23,11 +27,11 @@ class QABot:
             model=None,
             translator=None,
             repo_id="TheBloke/WizardLM-13B-V1-1-SuperHOT-8K-GGML",
-            filename="wizardlm-13b-v1.1-superhot-8k.ggmlv3.q5_0.bin",
+            filename="wizardlm-13b-v1.1-superhot-8k.ggmlv3.q4_1.bin",
     ):
         self.answer = None
         self.context = None
-        self.vector_store = VectorStore()
+        self.vector_store = VectorStore(embeddings_gpu=False)
 
         self.model = model
         if model is None:
@@ -80,8 +84,10 @@ class QABot:
         context_str = "\n\n".join(f"{x}" for i, x in enumerate(context))
 
         template = (
-            "You are a chatbot, your primary task is to help people by answering their questions. Keep your responses short, precise, and directly related to the user's question, using the following context to guide your answer:\n"
-            "{context_str}\n\n"
+            "You are a chatbot, your primary task is to help people by answering their questions. Keep your responses short, precise, and directly related to the user's question, using the following context to guide your answer:\n\n"
+            "---\n"
+            "{context_str}\n"
+            "---\n\n"
             "Try your best to answer based on the given context, and avoid creating new information. If the context does not provide enough details to formulate a response, or if you are unsure, kindly state that you can't provide a certain answer.\n"
             "\n\n"
             "USER: {question}\n"
@@ -93,14 +99,15 @@ class QABot:
         )
 
         print(prompt.format_prompt(question=question, context_str=context_str).to_string())
-        answer = self.model.generate_prompt(
-            [
-                prompt.format_prompt(question=question, context_str=context_str),
-            ],
-            stop=["</s>"],
-            callbacks=None if handler is None else [handler],
-        )
-        return answer.generations[0][0].text.strip()
+        with critical_function_lock:
+            answer = self.model.generate_prompt(
+                [
+                    prompt.format_prompt(question=question, context_str=context_str),
+                ],
+                stop=["</s>"],
+                callbacks=None if handler is None else [handler],
+            )
+            return answer.generations[0][0].text.strip()
 
     def translate_text(self, question, language="EN-US") -> TextResult:
         return self.translator.translate_to(
@@ -125,11 +132,11 @@ class QABot:
 
         print(f"Receive Question: {question}")
 
-        #translation = self.translate_text(question)
-        #if handler is not None:
+        # translation = self.translate_text(question)
+        # if handler is not None:
         #    handler.lang = translation.detected_source_lang
-        #translated_question = translation.text
-        #print(f"Translation: {translated_question}")
+        # translated_question = translation.text
+        # print(f"Translation: {translated_question}")
 
         context = self.vector_store.sim_search(question)
         print("Content:" + str(context["content"]))
@@ -147,9 +154,9 @@ class QABot:
             question, context["content"], handler
         )
         print(f"Answer: {answer}")
-        #if translation.detected_source_lang != "EN-US":
+        # if translation.detected_source_lang != "EN-US":
         #    answer = self.translate_text(answer, translation.detected_source_lang).text
-        #print(f"Translated answer: {answer}")
+        # print(f"Translated answer: {answer}")
 
         return {
             "answer": answer,
