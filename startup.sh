@@ -27,11 +27,11 @@ items=(
   "Fill DB with Dummy Data"
   "Fill DB with Confluence Data"
   "Run Slack Bot",
-  "Start QA Bot" )
+  "Test QA Bot" )
 
 PYTHONEXEC=venv/bin/python3
 
-select item in "${items[@]}" Quit
+select item in "${items[@]}"
 do
     case $REPLY in
         1) ${PYTHONEXEC} QAChat/Common/db_cli.py INFO; break;;
