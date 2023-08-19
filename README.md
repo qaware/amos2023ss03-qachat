@@ -37,5 +37,5 @@ $ docker compose up weaviate -d
 
 ```shell
 $ docker compose build data_processing
-$ docker compose up data_processing --build
+$ docker compose up data_processing
 ```

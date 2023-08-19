@@ -6,10 +6,24 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import List
 
-from QAChat.Data_Processing.document_embedder import DataInformation
+from QAChat.Data_Processing.preprocessor.data_information import DataInformation, DataSource
 
 
 class DataPreprocessor(ABC):
+
+    @abstractmethod
+    def get_source(self) -> DataSource:
+        """
+        Returns the DataSource enum value that corresponds to the specific data type
+        that is preprocessed by the instance calling this method.
+
+        Returns:
+        DataSource: The DataSource enum value that corresponds to the specific data type
+        that is preprocessed by the instance calling this method.
+        """
+        pass
+
+
     @abstractmethod
     def load_preprocessed_data(
         self, end_of_timeframe: datetime, start_of_timeframe: datetime

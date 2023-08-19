@@ -288,5 +288,7 @@ weaviate_data
 huggingface_data
 torch_data
 
+notes.txt
+
 data/
 

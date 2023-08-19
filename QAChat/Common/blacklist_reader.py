@@ -1,7 +1,8 @@
 import os
 
 BLACKLIST_PATH = os.getenv("BLACKLIST_PATH")
-
+if BLACKLIST_PATH is None:
+    raise Exception("BLACKLIST_PATH is not set")
 
 class Blacklist:
     def __init__(self, identifier:str=None, note:str=None):

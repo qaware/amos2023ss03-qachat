@@ -8,7 +8,6 @@ import traceback
 
 from threading import Thread
 
-from dotenv import load_dotenv
 from slack_sdk import WebClient
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from slack_bolt import App
@@ -18,8 +17,12 @@ from QAChat.Slack_Bot.base_agent import BaseAgent
 from QAChat.Slack_Bot.qa_bot_api_interface import QABotAPIInterface
 
 SLACK_TOKEN = os.getenv("SLACK_TOKEN")
-SLACK_APP_TOKEN = os.getenv("SLACK_APP_TOKEN")
+if SLACK_TOKEN is None:
+    raise Exception("SLACK_TOKEN not set")
 
+SLACK_APP_TOKEN = os.getenv("SLACK_APP_TOKEN")
+if SLACK_APP_TOKEN is None:
+    raise Exception("SLACK_APP_TOKEN not set")
 
 class QAAgent(BaseAgent):
     def __init__(self, app=None, client=None, handler=None, api_interface=None):
