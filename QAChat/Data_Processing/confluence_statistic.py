@@ -9,12 +9,14 @@ class Statistic:
     def __init__(self):
         processor = ConfluencePreprocessor()
 
-        date_string = "2023-05-04"
-        format_string = "%Y-%m-%d"
-
-        self.data = processor.load_preprocessed_data(
-            datetime.now(), datetime.strptime(date_string, format_string)
+        self.documents = processor.load_preprocessed_data(
+            datetime.now(),
+            datetime(1970, 1, 1)
         )
+        print("Loaded " + str(len(self.documents)) + " documents.")
+        for doc in self.documents:
+            print(doc.id, doc.title)
+
         self.spaces = processor.get_all_spaces()
         self.statistic = []
         self.costs_per_char = 20 / 1_000_000 # 20 € per 1 million characters for DeepL API
@@ -23,7 +25,7 @@ class Statistic:
 
         for space in self.spaces:
             pages = []
-            for data in self.data:
+            for data in self.documents:
                 if data.space == space["key"]:
                     pages.append({
                         "page_id": data.id,

@@ -45,11 +45,11 @@ class DocumentEmbedder:
 
         last_updated = LastModified().get_last_update(data_preprocessor.get_source())
         current_time = datetime.now()
-        print("Start: Load data from " + data_preprocessor.get_source().value)
+        print("Start: Load data from " + data_preprocessor.get_source().value + " and start date " + last_updated)
         all_changed_data = data_preprocessor.load_preprocessed_data(
             current_time, last_updated
         )
-        print("Done: Load data from " + data_preprocessor.get_source().value)
+        print("Loaded " + str(len(all_changed_data)) + " documents.")
 
         # identify names and add name-tags before chunking and translation
         #all_changed_data = self.identify_names(all_changed_data)
@@ -57,7 +57,7 @@ class DocumentEmbedder:
         # transform long entries into multiple chunks and translation to english
         print("Start: transform_text_to_chunks")
         all_changed_data = transform_text_to_chunks(all_changed_data)
-        print("Done: transform_text_to_chunks")
+        print("number of chunks to update:" + str(len(all_changed_data)))
         #print(
         #    self.db.weaviate_client.query.get("Embeddings", ["type_id", "text"])
         #    .do()
@@ -66,7 +66,7 @@ class DocumentEmbedder:
         if len(all_changed_data) == 0:
             return
 
-        print("number of texts to update:" + str(len(all_changed_data)))
+
         self.vector_store.update_add_texts(all_changed_data, data_preprocessor.get_source())
 
         LastModified().update(data_preprocessor.get_source(), current_time)

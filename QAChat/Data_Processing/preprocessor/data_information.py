@@ -15,7 +15,6 @@ class DataInformation:
         self.last_changed: datetime = last_changed
         self.typ: DataSource = typ
         self.text: str = text
-
         self.title: str = title
         self.space: str = space
         self.link: str = link

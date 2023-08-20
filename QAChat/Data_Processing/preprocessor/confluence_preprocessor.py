@@ -9,11 +9,11 @@ from typing import List
 import re
 
 import requests
-import weaviate
 from atlassian import Confluence
 from bs4 import BeautifulSoup
 
 from QAChat.Common.blacklist_reader import read_blacklist_items
+from QAChat.Common.vectordb import VectorDB
 from QAChat.Data_Processing.preprocessor.data_preprocessor import DataPreprocessor
 from QAChat.Data_Processing.preprocessor.google_doc_preprocessor import GoogleDocPreProcessor
 from QAChat.Data_Processing.preprocessor.data_information import DataInformation, DataSource
@@ -36,10 +36,6 @@ CONFLUENCE_SPACE_WHITELIST = os.getenv("CONFLUENCE_SPACE_WHITELIST").split(",")
 if CONFLUENCE_SPACE_WHITELIST is None:
     raise ValueError("Please set CONFLUENCE_SPACE_WHITELIST environment variable")
 
-# Get Weaviate URL from environment variables
-WEAVIATE_URL = os.getenv("WEAVIATE_URL")
-
-
 class ConfluencePreprocessor(DataPreprocessor):
     def __init__(self):
         self.confluence = Confluence(
@@ -54,7 +50,7 @@ class ConfluencePreprocessor(DataPreprocessor):
         self.all_page_information = []
         self.restricted_pages = []
         self.restricted_spaces = []
-        self.weaviate_client = weaviate.Client(url=WEAVIATE_URL)
+        self.db = VectorDB()
         self.last_update_lookup = dict()
         self.chunk_id_lookup_table = dict()
         self.g_docs_proc = GoogleDocPreProcessor()
@@ -284,7 +280,7 @@ class ConfluencePreprocessor(DataPreprocessor):
     def init_lookup_tables(self):
         # get the metadata of type Confluence from DB
         data = (
-            self.weaviate_client.query.get(
+            self.db.weaviate_client.query.get(
                 "Embeddings", ["type", "type_id", "last_changed"]
             )
             .with_where(
@@ -327,8 +323,8 @@ class ConfluencePreprocessor(DataPreprocessor):
                     self.last_update_lookup[
                         i.id
                     ] = None  # make the dict's entry None -> To detect remove page
-            if i.last_changed.year >= 2022:
-                to_delete.append(i)
+            #if i.last_changed.year >= 2022:
+            #    to_delete.append(i)
 
         for i in to_delete:
             self.all_page_information.remove(
@@ -344,7 +340,7 @@ class ConfluencePreprocessor(DataPreprocessor):
     def remove_from_db(self, id):
         # loop over max number in chunk id and remove all the rows from DB
         for i in range(0, int(self.chunk_id_lookup_table[id]) + 1):
-            self.weaviate_client.batch.delete_objects(
+            self.db.weaviate_client.batch.delete_objects(
                 "Embeddings",
                 {
                     "path": ["type_id"],
