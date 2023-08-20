@@ -8,7 +8,8 @@ from datetime import datetime
 from typing import List
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
-import weaviate
+
+from QAChat.Common.vectordb import VectorDB
 from QAChat.Data_Processing.preprocessor.data_preprocessor import DataPreprocessor
 from QAChat.Data_Processing.preprocessor.data_information import DataInformation, DataSource
 
@@ -24,17 +25,13 @@ SLACK_SIGNING_SECRET = os.getenv("SLACK_SIGNING_SECRET")
 if SLACK_SIGNING_SECRET is None:
     raise Exception("SLACK SIGNING_SECRET not set")
 
-WEAVIATE_URL = os.getenv("WEAVIATE_URL")
-if WEAVIATE_URL is None:
-    raise Exception("WEAVIATE_URL not set")
-
 class SlackPreprocessor(DataPreprocessor):
     def __init__(self):
         self.client = WebClient(token=SLACK_TOKEN)
         self.conversation_store = {}
         self.conversation_history = []
         self.count_found_messages = 0
-        self.weaviate = weaviate.Client(url=WEAVIATE_URL)
+        self.db = VectorDB()
 
     def get_source(self) -> DataSource:
         return DataSource.SLACK
@@ -103,7 +100,7 @@ class SlackPreprocessor(DataPreprocessor):
     ) -> List[DataInformation]:
         self.fetch_conversations()
         oldest = start_of_timeframe.timestamp()
-        already_loaded_ids = self.weaviate.query.get(
+        already_loaded_ids = self.db.weaviate_client.query.get(
             "LoadedChannels", ["channel_id"]
         ).do()["data"]["Get"]["LoadedChannels"]
 
@@ -124,7 +121,7 @@ class SlackPreprocessor(DataPreprocessor):
         ]
 
         for channel_id, channel_name in zip(new_channels, new_channels_names):
-            self.weaviate.data_object.create(
+            self.db.weaviate_client.data_object.create(
                 {"channel_id": channel_id, "channel_name": channel_name},
                 "LoadedChannels",
             )
