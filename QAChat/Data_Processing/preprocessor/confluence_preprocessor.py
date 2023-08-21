@@ -4,20 +4,20 @@
 
 import io
 import os
+import re
 from datetime import datetime
 from typing import List
-import re
 
 import requests
 from atlassian import Confluence
-from bs4 import BeautifulSoup
 
 from QAChat.Common.blacklist_reader import read_blacklist_items
 from QAChat.Common.vectordb import VectorDB
+from QAChat.Data_Processing.pdf_reader import PDFReader
+from QAChat.Data_Processing.preprocessor.data_information import DataInformation, DataSource
 from QAChat.Data_Processing.preprocessor.data_preprocessor import DataPreprocessor
 from QAChat.Data_Processing.preprocessor.google_doc_preprocessor import GoogleDocPreProcessor
-from QAChat.Data_Processing.preprocessor.data_information import DataInformation, DataSource
-from QAChat.Data_Processing.pdf_reader import PDFReader
+from QAChat.Data_Processing.preprocessor.html_to_text import get_text
 
 # Get Confluence API credentials from environment variables
 CONFLUENCE_ADDRESS = os.getenv("CONFLUENCE_ADDRESS")
@@ -35,6 +35,7 @@ if CONFLUENCE_TOKEN is None:
 CONFLUENCE_SPACE_WHITELIST = os.getenv("CONFLUENCE_SPACE_WHITELIST").split(",")
 if CONFLUENCE_SPACE_WHITELIST is None:
     raise ValueError("Please set CONFLUENCE_SPACE_WHITELIST environment variable")
+
 
 class ConfluencePreprocessor(DataPreprocessor):
     def __init__(self):
@@ -143,6 +144,10 @@ class ConfluencePreprocessor(DataPreprocessor):
             last_changed = self.get_last_modified_formated_date(page_info)
             text = self.get_raw_text_from_page(page_with_body)
 
+            # skip pages with less than 5 characters
+            if len(text) < 5:
+                continue
+
             # get googledoc url:
             urls = re.findall(r"https?://docs\.google\.com\S+", text)
 
@@ -153,15 +158,17 @@ class ConfluencePreprocessor(DataPreprocessor):
             # get content from confluence attachments
             pdf_content = ""  # self.get_content_from_page_attachments(page_id)
 
-            # replace consecutive occurrences of \n into one space
-            text = re.sub(
-                r"\n+",
-                " ",
-                text
-                # commented out because we don't have access tho client's google drive
-                # + " " + google_doc_content
-                + " " + pdf_content,
-            )
+            # replace consecutive occurrences of \n into one \n
+            text = re.sub(r"\n+","\n",  text)
+            # replace " \n" with "\n"
+            text = re.sub(r" \n","\n",  text)
+            # remove leading \n
+            text = re.sub(r"^\n", "", text)
+
+            # commented out because we don't have access tho client's google drive
+            # + " " + google_doc_content
+            # + " " + pdf_content,
+
             # print(f"Länge {page_id}: %d \n" % len(text))
             # Add Page content to list of DataInformation
             # print(page_info["_links"]["base"] + page_info["_links"]["webui"].split("overview")[0])
@@ -191,14 +198,12 @@ class ConfluencePreprocessor(DataPreprocessor):
 
         return datetime(year, month, day)
 
+
     def get_raw_text_from_page(self, page_with_body) -> str:
         # Get page content
         page_in_html = page_with_body["body"]["storage"]["value"]
-
-        # Convert HTML page content to raw text
-        page_in_raw_text = BeautifulSoup(page_in_html, features="html.parser")
-
-        return page_in_raw_text.get_text()
+        return page_in_html
+        #return get_text(page_in_html)
 
     def get_content_from_google_drive(self, urls):
         pdf_content = ""
@@ -222,8 +227,7 @@ class ConfluencePreprocessor(DataPreprocessor):
         attachments = []
 
         number_of_attachments = self.confluence.get_attachments_from_content(
-            page_id=page_id, start=start, limit=limit
-        )["size"]
+            page_id=page_id, start=start, limit=limit)["size"]
         pdf_content = ""
 
         if number_of_attachments > 0:
@@ -323,7 +327,7 @@ class ConfluencePreprocessor(DataPreprocessor):
                     self.last_update_lookup[
                         i.id
                     ] = None  # make the dict's entry None -> To detect remove page
-            #if i.last_changed.year >= 2022:
+            # if i.last_changed.year >= 2022:
             #    to_delete.append(i)
 
         for i in to_delete:
@@ -378,8 +382,7 @@ class ConfluencePreprocessor(DataPreprocessor):
                 # exclude personal/user spaces only global spaces
                 if space["type"] == "global":
                     # exclude blacklisted spaces
-                    if space["key"] not in self.restricted_spaces and space["key"].startswith("QAWARE") or space[
-                        "key"].startswith("QAware"):
+                    if space["key"] not in self.restricted_spaces and space["key"].startswith("QAWARE") or space["key"].startswith("QAware"):
                         whitelist.append(space)
 
             # Check if there are more spaces

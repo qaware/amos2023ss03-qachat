@@ -27,7 +27,8 @@ items=(
   "Fill DB with Dummy Data"
   "Fill DB with Confluence Data"
   "Run Slack Bot",
-  "Test QA Bot" )
+  "Test QA Bot"
+  "Store Confluence Documents to output.json")
 
 PYTHONEXEC=venv/bin/python3
 
@@ -42,6 +43,7 @@ do
         6) ${PYTHONEXEC} QAChat/Data_Processing/main.py CONFLUENCE; break;;
         7) ${PYTHONEXEC} QAChat/Slack_Bot/qa_agent.py; break;;
         8) ${PYTHONEXEC} QAChat/QA_Bot/qa_bot.py; break;;
+        9) ${PYTHONEXEC} Testing/store_documents.py CONFLUENCE; break;;
         *) echo "Ooops - unknown choice $REPLY"; break;
     esac
 done
