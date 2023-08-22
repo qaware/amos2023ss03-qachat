@@ -1,10 +1,18 @@
 import os
 import sys
 import textwrap
+from typing import List
 
 import weaviate
 from prettytable import PrettyTable
 import re
+
+
+class EmbeddingType:
+    def __init__(self, page_id: str, chunk_id: str, last_update: str):
+        self.page_id = page_id
+        self.chunk_id = chunk_id
+        self.last_update = last_update
 
 
 class VectorDB:
@@ -82,6 +90,25 @@ class VectorDB:
                 sys.exit("Bad condition format!")
 
         print_data(index_name, properties, result)
+
+    def get_all_for_type(self, typestr: str) -> List[EmbeddingType]:
+        data = (
+            self.weaviate_client.query.get(
+                "Embeddings", ["type", "type_id", "last_changed"]
+            )
+            .with_where(
+                {"path": ["type"], "operator": "Equal", "valueString": typestr}
+            )
+            .do()["data"]["Get"]["Embeddings"]
+        )
+        embedded = []
+        for d in data:
+            page_id = d["type_id"].split("_")[0]
+            chunk_id = d["type_id"].split("_")[1]
+            last_update = d["last_changed"]
+            embedded.append(EmbeddingType(page_id, chunk_id, last_update))
+
+        return embedded
 
     def clear_db(self):
         return self.weaviate_client.schema.delete_all()

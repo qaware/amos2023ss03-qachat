@@ -33,6 +33,11 @@ if __name__ == "__main__":
 
         documents = data_preprocessor.load_preprocessed_data(datetime.now(), datetime(1970, 1, 1))
 
+        nchars = 0
+        for doc in documents:
+            nchars += len(doc.text)
+
+        print("Loaded " + str(len(documents)) + " documents with " + str(nchars) + " characters.")
 
         def dumper(obj):
             if isinstance(obj, datetime):
@@ -50,3 +55,16 @@ if __name__ == "__main__":
             text_file.write(documentsAsJson)
 
         print("Stored documents in documents.json")
+
+        with open("documents.txt", "w") as text_file:
+            for doc in documents:
+                text_file.write("title: " + doc.title + "\n")
+                text_file.write("id: " + doc.id + "\n")
+                text_file.write("last changed: " + doc.last_changed.isoformat() + "\n")
+                text_file.write("typ: " + doc.typ.value + "\n")
+                text_file.write("link: " + doc.link + "\n")
+                text_file.write("space: " + doc.space + "\n")
+                text_file.write("text:\n" +doc.text + "\n")
+                text_file.write("\n\n------------------------------------------------------\n\n")
+
+        print("Stored documents in documents.txt")

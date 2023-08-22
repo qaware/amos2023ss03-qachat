@@ -11,8 +11,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from QAChat.Common.deepL_translator import DeepLTranslator
 from QAChat.Data_Processing.preprocessor.data_information import DataInformation
 
-CHUNK_SIZE = 2000
-CHUNK_OVERLAP = 200
+CHUNK_SIZE = 500
+CHUNK_OVERLAP = 50
 
 
 def transform_text_to_chunks(data_information_list) -> List[DataInformation]:

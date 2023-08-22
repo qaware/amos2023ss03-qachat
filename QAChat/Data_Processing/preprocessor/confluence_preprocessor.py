@@ -39,6 +39,7 @@ if CONFLUENCE_SPACE_WHITELIST is None:
 
 class ConfluencePreprocessor(DataPreprocessor):
     def __init__(self):
+        self.db = VectorDB()
         self.confluence = Confluence(
             url=CONFLUENCE_ADDRESS,
             username=CONFLUENCE_USERNAME,
@@ -141,7 +142,7 @@ class ConfluencePreprocessor(DataPreprocessor):
                 page_id, expand=None, status=None, version=None
             )
             # Set final parameters for DataInformation
-            last_changed = self.get_last_modified_formated_date(page_info)
+            last_changed = self.get_last_modified_formatted_date(page_info)
             text = self.get_raw_text_from_page(page_with_body)
 
             # skip pages with less than 5 characters
@@ -184,7 +185,7 @@ class ConfluencePreprocessor(DataPreprocessor):
                 )
             )
 
-    def get_last_modified_formated_date(self, page_info) -> datetime:
+    def get_last_modified_formatted_date(self, page_info) -> datetime:
         # Get date of last modified page
         data_last_changed = page_info["version"]["when"]
         year_string = data_last_changed[0:4]
@@ -202,8 +203,8 @@ class ConfluencePreprocessor(DataPreprocessor):
     def get_raw_text_from_page(self, page_with_body) -> str:
         # Get page content
         page_in_html = page_with_body["body"]["storage"]["value"]
-        return page_in_html
-        #return get_text(page_in_html)
+        #return page_in_html
+        return get_text(page_in_html)
 
     def get_content_from_google_drive(self, urls):
         pdf_content = ""
@@ -283,33 +284,21 @@ class ConfluencePreprocessor(DataPreprocessor):
 
     def init_lookup_tables(self):
         # get the metadata of type Confluence from DB
-        data = (
-            self.db.weaviate_client.query.get(
-                "Embeddings", ["type", "type_id", "last_changed"]
-            )
-            .with_where(
-                {"path": ["type"], "operator": "Equal", "valueString": "confluence"}
-            )
-            .do()["data"]["Get"]["Embeddings"]
-        )
+        data = self.db.get_all_for_type("confluence")
 
-        for i in data:
-            page_id = i["type_id"].split("_")[0]
-            chunk_id = i["type_id"].split("_")[1]
-            last_update = i["last_changed"]
-
+        for d in data:
             # add each ID in dict last_update_lookup
-            if page_id not in self.last_update_lookup:
-                self.last_update_lookup[page_id] = datetime.strptime(
-                    last_update.split("T")[0], "%Y-%m-%d"
+            if d.page_id not in self.last_update_lookup:
+                self.last_update_lookup[d.page_id] = datetime.strptime(
+                    d.last_update.split("T")[0], "%Y-%m-%d"
                 )
 
             # add max of chunk ID to chunk_id_lookup_table
-            if page_id not in self.chunk_id_lookup_table:
-                self.chunk_id_lookup_table[page_id] = chunk_id
+            if d.page_id not in self.chunk_id_lookup_table:
+                self.chunk_id_lookup_table[d.page_id] = d.chunk_id
             else:
-                if chunk_id > self.chunk_id_lookup_table[page_id]:
-                    self.chunk_id_lookup_table[page_id] = chunk_id
+                if d.chunk_id > self.chunk_id_lookup_table[d.page_id]:
+                    self.chunk_id_lookup_table[d.page_id] = d.chunk_id
 
     def filter_pages(self):
         to_delete = []
@@ -395,7 +384,7 @@ class ConfluencePreprocessor(DataPreprocessor):
 if __name__ == "__main__":
     cp = ConfluencePreprocessor()
 
-    date_string = "2023-05-04"
+    date_string = "2070-01-01"
     format_string = "%Y-%m-%d"
 
     z = cp.load_preprocessed_data(

@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 def get_text(markup: str) -> str:
     _inline_elements = {"a", "span", "em", "strong", "u", "i", "font", "mark", "label",
-                        "s", "sub", "sup", "tt", "bdo", "button", "cite", "del", "b", "td"}
+                        "s", "sub", "sup", "tt", "bdo", "button", "cite", "del", "b", "td", "th"}
 
     strip_tags = ['style', 'script', 'code']
     doc = BeautifulSoup(unescape(markup), "html.parser")
