@@ -12,7 +12,7 @@ import requests
 from atlassian import Confluence
 
 from QAChat.Common.blacklist_reader import read_blacklist_items
-from QAChat.Common.vectordb import VectorDB
+from QAChat.VectorDB.vectordb import VectorDB
 from QAChat.Data_Processing.pdf_reader import PDFReader
 from QAChat.Data_Processing.preprocessor.data_information import DataInformation, DataSource
 from QAChat.Data_Processing.preprocessor.data_preprocessor import DataPreprocessor

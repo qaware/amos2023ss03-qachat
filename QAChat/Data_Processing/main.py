@@ -4,7 +4,7 @@
 import sys
 
 from document_embedder import DocumentEmbedder
-from QAChat.Common.vectordb import VectorDB
+from QAChat.VectorDB.vectordb import VectorDB
 
 if __name__ == "__main__":
     VectorDB().init_db()

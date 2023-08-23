@@ -10,7 +10,7 @@ from deepl import TextResult
 from huggingface_hub import hf_hub_download
 from langchain import LlamaCpp, PromptTemplate
 
-from QAChat.Common.vector_store import VectorStore
+from QAChat.VectorDB.vector_store import VectorStore
 from QAChat.Common.deepL_translator import DeepLTranslator
 from QAChat.QA_Bot.stream_LLM_callback_handler import StreamLLMCallbackHandler
 
@@ -31,7 +31,7 @@ class QABot:
     ):
         self.answer = None
         self.context = None
-        self.vector_store = VectorStore(embeddings_gpu=False)
+        self.vector_store = VectorStore()
 
         self.model = model
         if model is None:

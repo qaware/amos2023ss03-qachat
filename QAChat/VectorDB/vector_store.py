@@ -1,17 +1,24 @@
+import os
+
 from langchain.embeddings import HuggingFaceInstructEmbeddings
 
-from QAChat.Common.vectordb import VectorDB
+from QAChat.VectorDB.vectordb import VectorDB
 from langchain.vectorstores import Weaviate
 
 from typing import List, Dict, Any, Union
+
 
 class VectorStore:
     def __init__(self, embeddings_gpu=True):
         self.db = VectorDB()
 
+        VECTORIZER_DEVICE: str = os.getenv("VECTORIZER_DEVICE")
+        if VECTORIZER_DEVICE is None:
+            raise Exception("VECTORIZER_DEVICE is not set")
+
         self.embedder = HuggingFaceInstructEmbeddings(
             model_name="hkunlp/instructor-xl",
-            model_kwargs={} if embeddings_gpu else {"device": "cpu"},
+            model_kwargs={"device": VECTORIZER_DEVICE},
         )
 
         self.vector_store = Weaviate(
@@ -28,7 +35,7 @@ class VectorStore:
             self.db.weaviate_client.batch.delete_objects(
                 "Embeddings",
                 where={
-                    "path": ["type_id"],
+                    "path": ["id"],
                     "operator": "Equal",
                     "valueString": type_id,
                 },
@@ -39,7 +46,7 @@ class VectorStore:
             [data.text for data in all_changed_data],
             [
                 {
-                    "type_id": data.id,
+                    "id": data.id,
                     "type": typ.value,
                     "last_changed": data.last_changed.isoformat(),
                     "text": data.text,

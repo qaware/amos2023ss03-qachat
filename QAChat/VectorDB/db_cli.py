@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2023 Felix Nützel
 import sys
-from QAChat.Common.vectordb import VectorDB
+from QAChat.VectorDB.vectordb import VectorDB
 
 db = VectorDB()
 

@@ -35,9 +35,9 @@ PYTHONEXEC=venv/bin/python3
 select item in "${items[@]}"
 do
     case $REPLY in
-        1) ${PYTHONEXEC} QAChat/Common/db_cli.py INFO; break;;
-        2) ${PYTHONEXEC} QAChat/Common/db_cli.py INFO LastModified; break;;
-        3) ${PYTHONEXEC} QAChat/Common/db_cli.py CLEAR; break;;
+        1) ${PYTHONEXEC} QAChat/VectorDB/db_cli.py INFO; break;;
+        2) ${PYTHONEXEC} QAChat/VectorDB/db_cli.py INFO LastModified; break;;
+        3) ${PYTHONEXEC} QAChat/VectorDB/db_cli.py CLEAR; break;;
         4) mkdir -p statistics && ${PYTHONEXEC} QAChat/Data_Processing/confluence_statistic.py; break;;
         5) ${PYTHONEXEC} QAChat/Data_Processing/main.py DUMMY; break;;
         6) ${PYTHONEXEC} QAChat/Data_Processing/main.py CONFLUENCE; break;;

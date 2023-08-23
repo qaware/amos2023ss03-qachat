@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from QAChat.Common.vectordb import VectorDB
+from QAChat.VectorDB.vectordb import VectorDB
 from QAChat.Data_Processing.preprocessor.data_information import DataSource
 
 

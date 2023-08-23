@@ -9,7 +9,7 @@ from typing import List
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
-from QAChat.Common.vectordb import VectorDB
+from QAChat.VectorDB.vectordb import VectorDB
 from QAChat.Data_Processing.preprocessor.data_preprocessor import DataPreprocessor
 from QAChat.Data_Processing.preprocessor.data_information import DataInformation, DataSource
 

@@ -17,7 +17,6 @@ class EmbeddingType:
 
 class VectorDB:
     def __init__(self):
-        # Get WEAVIATE_URL
         WEAVIATE_URL = os.getenv("WEAVIATE_URL")
         if WEAVIATE_URL is None:
             raise Exception("WEAVIATE_URL is not set")
@@ -103,8 +102,8 @@ class VectorDB:
         )
         embedded = []
         for d in data:
-            page_id = d["type_id"].split("_")[0]
-            chunk_id = d["type_id"].split("_")[1]
+            page_id = d["id"].split("_")[0]
+            chunk_id = d["id"].split("_")[1]
             last_update = d["last_changed"]
             embedded.append(EmbeddingType(page_id, chunk_id, last_update))
 
@@ -118,12 +117,38 @@ class VectorDB:
             self.weaviate_client.schema.create_class(
                 {
                     "class": "Embeddings",
+                    "vectorizer": "none",  # We want to import your own vectors
+                    "vectorIndexType": "hnsw",  # default
+                    "vectorIndexConfig": {
+                        "distance": "cosine",
+                    },
+                    "invertedIndexConfig": {
+                        "stopwords": {
+                            "preset": "en",
+                            "additions": []
+                        }
+                    },
                     "properties": [
-                        {"name": "type_id", "dataType": ["string"]},
-                        {"name": "type", "dataType": ["string"]},
-                        {"name": "last_changed", "dataType": ["string"]},
-                        {"name": "text", "dataType": ["string"]},
-                        {"name": "link", "dataType": ["string"]},
+                        {"name": "type_id", "dataType": ["text"]},
+                        {
+                            "name": "chunk",
+                            "dataType": ["int"],
+                            "indexFilterable": False,  # disable filterable index for this property
+                            "indexSearchable": False,  # disable searchable index for this property
+                        },
+                        {"name": "type", "dataType": ["text"]},
+                        {"name": "last_changed", "dataType": ["text"]},
+                        {
+                            "name": "text",
+                            "dataType": ["text"],
+                            "tokenization": "word",
+                        },
+                        {
+                            "name": "link",
+                            "dataType": ["text"],
+                            "indexFilterable": False,  # disable filterable index for this property
+                            "indexSearchable": False,  # disable searchable index for this property
+                        },
                     ],
                 }
             )
@@ -131,9 +156,13 @@ class VectorDB:
             self.weaviate_client.schema.create_class(
                 {
                     "class": "LastModified",
+                    "vectorizer": "none",
+                    "vectorIndexConfig": {
+                        "skip": True  # disable vectorindex
+                    },
                     "properties": [
-                        {"name": "type", "dataType": ["string"]},
-                        {"name": "last_update", "dataType": ["string"]},
+                        {"name": "type", "dataType": ["text"]},
+                        {"name": "last_update", "dataType": ["text"]},
                     ],
                 }
             )
@@ -142,9 +171,12 @@ class VectorDB:
             self.weaviate_client.schema.create_class(
                 {
                     "class": "LoadedChannels",
+                    "vectorIndexConfig": {
+                        "skip": "true"  # disable vectorindex
+                    },
                     "properties": [
-                        {"name": "channel_id", "dataType": ["string"]},
-                        {"name": "channel_name", "dataType": ["string"]},
+                        {"name": "channel_id", "dataType": ["text"]},
+                        {"name": "channel_name", "dataType": ["text"]},
                     ],
                 }
             )

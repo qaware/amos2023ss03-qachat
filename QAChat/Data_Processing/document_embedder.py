@@ -13,8 +13,8 @@ import xx_ent_wiki_sm
 from spacy_langdetect import LanguageDetector
 
 from QAChat.Common.deepL_translator import DeepLTranslator
-from QAChat.Common.vector_store import VectorStore
-from QAChat.Common.vectordb import VectorDB
+from QAChat.VectorDB.vector_store import VectorStore
+from QAChat.VectorDB.vectordb import VectorDB
 from QAChat.Data_Processing.last_modified import LastModified
 from QAChat.Data_Processing.preprocessor.data_information import DataInformation
 from QAChat.Data_Processing.preprocessor.data_preprocessor import DataPreprocessor
@@ -23,8 +23,7 @@ from QAChat.Data_Processing.text_transformer import transform_text_to_chunks
 
 class DocumentEmbedder:
     def __init__(self):
-        self.vector_store = VectorStore(embeddings_gpu=False)
-        #self.vector_store = VectorStore(embeddings_gpu=True)
+        self.vector_store = VectorStore()
         self.db = VectorDB()
 
         # name identification
@@ -58,11 +57,6 @@ class DocumentEmbedder:
         print("Start: transform_text_to_chunks")
         all_changed_data = transform_text_to_chunks(all_changed_data)
         print("number of chunks to update:" + str(len(all_changed_data)))
-        #print(
-        #    self.db.weaviate_client.query.get("Embeddings", ["type_id", "text"])
-        #    .do()
-        #    .items()
-        #)
         if len(all_changed_data) == 0:
             return
 
@@ -71,11 +65,6 @@ class DocumentEmbedder:
 
         LastModified().update(data_preprocessor.get_source(), current_time)
         LastModified().show_last_entries()
-        #print(
-        #    self.db.weaviate_client.query.get("Embeddings", ["type_id", "text"])
-        #    .do()
-        #    .items()
-        #)
 
     def identify_names(self, all_data: List[DataInformation]) -> List[DataInformation]:
         """
