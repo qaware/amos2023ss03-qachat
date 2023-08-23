@@ -11,7 +11,8 @@ class Statistic:
 
         self.documents = processor.load_preprocessed_data(
             datetime.now(),
-            datetime(1970, 1, 1)
+            datetime(1970, 1, 1),
+            do_filter=False
         )
         print("Loaded " + str(len(self.documents)) + " documents.")
         for doc in self.documents:

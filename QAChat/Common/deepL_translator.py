@@ -7,13 +7,16 @@ import os
 
 import deepl
 import xx_ent_wiki_sm
-from deepl import TextResult
 from spacy import Language
 from spacy_langdetect import LanguageDetector
 
 DEEPL_TOKEN = os.getenv("DEEPL_TOKEN")
 if DEEPL_TOKEN is None:
-    DEEPL_TOKEN = os.getenv("DEEPL_TOKEN")
+    raise Exception("DEEPL_TOKEN not set")
+
+TRANSLATE = os.getenv("TRANSLATE")
+if TRANSLATE is None:
+    raise Exception("TRANSLATE not set")
 
 
 class Result:
@@ -24,7 +27,8 @@ class Result:
 
 class DeepLTranslator:
     def __init__(self):
-        super().__init__()
+        if not TRANSLATE:
+            return
         # initialize a DeepL translator service
         self.translator = deepl.Translator(DEEPL_TOKEN)
         self.multi_lang_nlp = xx_ent_wiki_sm.load()
@@ -34,7 +38,10 @@ class DeepLTranslator:
         if "language_detector" not in self.multi_lang_nlp.pipe_names:
             self.multi_lang_nlp.add_pipe("language_detector", last=True)
 
-    def translate_to(self, text, target_lang, use_spacy_to_detect_lang_if_needed=True) -> TextResult:
+    def translate_to(self, text, target_lang, use_spacy_to_detect_lang_if_needed=True) -> Result:
+        if not TRANSLATE:
+            return Result(text, "EN_US")
+
         if use_spacy_to_detect_lang_if_needed:
             doc = self.multi_lang_nlp(text)
             if (
@@ -45,18 +52,17 @@ class DeepLTranslator:
                 return Result(text, "EN_US")
 
         try:
-            result = self.translator.translate_text(
+            translated_text = self.translator.translate_text(
                 text, target_lang=target_lang, ignore_tags="name"
             )
         except Exception as e:
-            print(e)
-            print("Error while translating text: " + text)
+            print("Error while translating text: ", e)
             return Result(text, "EN-US")
-        if result.detected_source_lang == "EN":
-            result.detected_source_lang = "EN-US"
-        elif result.detected_source_lang == "PT":
-            result.detected_source_lang = "PT-PT"
-        return result
+        if translated_text.detected_source_lang == "EN":
+            translated_text.detected_source_lang = "EN-US"
+        elif translated_text.detected_source_lang == "PT":
+            translated_text.detected_source_lang = "PT-PT"
+        return Result(translated_text.text, translated_text.detected_source_lang)
 
     def get_lang_detector(self, nlp, name):
         return LanguageDetector()

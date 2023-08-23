@@ -31,7 +31,10 @@ if __name__ == "__main__":
             print("Sorry, wrong argument.")
             sys.exit(1)
 
-        documents = data_preprocessor.load_preprocessed_data(datetime.now(), datetime(1970, 1, 1))
+        documents = data_preprocessor.load_preprocessed_data(
+            datetime.now(),
+            datetime(1970, 1, 1),
+            do_filter=False)
 
         nchars = 0
         for doc in documents:

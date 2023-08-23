@@ -44,19 +44,18 @@ class ConfluencePreprocessor(DataPreprocessor):
             url=CONFLUENCE_ADDRESS,
             username=CONFLUENCE_USERNAME,
             password=CONFLUENCE_TOKEN,
-            cloud=True,
         )
+        self.db = VectorDB()
+
         self.pdf_reader = PDFReader()
         self.__all_spaces = []
         self.all_pages_id = []
         self.all_page_information = []
         self.restricted_pages = []
         self.restricted_spaces = []
-        self.db = VectorDB()
         self.last_update_lookup = dict()
         self.chunk_id_lookup_table = dict()
         self.g_docs_proc = GoogleDocPreProcessor()
-        self.pdf_reader = PDFReader()
 
     def get_source(self) -> DataSource:
         return DataSource.CONFLUENCE
@@ -75,6 +74,7 @@ class ConfluencePreprocessor(DataPreprocessor):
                 self.restricted_spaces.append(entries.identifier.split("/")[5])
 
     def get_all_spaces(self):
+        print("Read the following confluence spaces:", CONFLUENCE_SPACE_WHITELIST)
         start = 0
         limit = 500
         all_spaces = []
@@ -86,7 +86,6 @@ class ConfluencePreprocessor(DataPreprocessor):
             # username: to your email used in confluence
             # password: if confluence is cloud set Confluence API Token https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/
             #           if confluence is server set your password
-            # cloud:    True if confluence is cloud version
 
             # Get all confluence spaces from the confluence instance
             spaces_data = self.confluence.get_all_spaces(
@@ -160,9 +159,9 @@ class ConfluencePreprocessor(DataPreprocessor):
             pdf_content = ""  # self.get_content_from_page_attachments(page_id)
 
             # replace consecutive occurrences of \n into one \n
-            text = re.sub(r"\n+","\n",  text)
+            text = re.sub(r"\n+", "\n", text)
             # replace " \n" with "\n"
-            text = re.sub(r" \n","\n",  text)
+            text = re.sub(r" \n", "\n", text)
             # remove leading \n
             text = re.sub(r"^\n", "", text)
 
@@ -199,11 +198,10 @@ class ConfluencePreprocessor(DataPreprocessor):
 
         return datetime(year, month, day)
 
-
     def get_raw_text_from_page(self, page_with_body) -> str:
         # Get page content
         page_in_html = page_with_body["body"]["storage"]["value"]
-        #return page_in_html
+        # return page_in_html
         return get_text(page_in_html)
 
     def get_content_from_google_drive(self, urls):
@@ -272,14 +270,14 @@ class ConfluencePreprocessor(DataPreprocessor):
         return pdf_content
 
     def load_preprocessed_data(
-            self, end_of_timeframe: datetime, start_of_timeframe: datetime
+            self, end_of_timeframe: datetime, start_of_timeframe: datetime, do_filter: bool = True
     ) -> List[DataInformation]:
         self.init_lookup_tables()
         self.init_blacklist()
         self.__all_spaces = self.get_all_spaces()
         self.get_all_page_ids_from_spaces()
         self.get_relevant_data_from_pages()
-        self.filter_pages()
+        if do_filter: self.filter_pages()
         return [data for data in self.all_page_information]
 
     def init_lookup_tables(self):
@@ -360,7 +358,6 @@ class ConfluencePreprocessor(DataPreprocessor):
             # username: to your email used in confluence
             # password: if confluence is cloud set Confluence API Token https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/
             #           if confluence is server set your password
-            # cloud:    True if confluence is cloud version
 
             # Get all confluence spaces from the confluence instance
             spaces = self.confluence.get_all_spaces(
@@ -371,7 +368,8 @@ class ConfluencePreprocessor(DataPreprocessor):
                 # exclude personal/user spaces only global spaces
                 if space["type"] == "global":
                     # exclude blacklisted spaces
-                    if space["key"] not in self.restricted_spaces and space["key"].startswith("QAWARE") or space["key"].startswith("QAware"):
+                    if space["key"] not in self.restricted_spaces and space["key"].startswith("QAWARE") or space[
+                        "key"].startswith("QAware"):
                         whitelist.append(space)
 
             # Check if there are more spaces

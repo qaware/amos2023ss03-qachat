@@ -35,7 +35,7 @@ class VectorStore:
             self.db.weaviate_client.batch.delete_objects(
                 "Embeddings",
                 where={
-                    "path": ["id"],
+                    "path": ["type_id"],
                     "operator": "Equal",
                     "valueString": type_id,
                 },
@@ -46,7 +46,7 @@ class VectorStore:
             [data.text for data in all_changed_data],
             [
                 {
-                    "id": data.id,
+                    "type_id": data.id,
                     "type": typ.value,
                     "last_changed": data.last_changed.isoformat(),
                     "text": data.text,

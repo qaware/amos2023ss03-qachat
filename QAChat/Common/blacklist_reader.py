@@ -5,10 +5,11 @@ BLACKLIST_PATH = os.getenv("BLACKLIST_PATH")
 if BLACKLIST_PATH is None:
     raise Exception("BLACKLIST_PATH is not set")
 
+
 class Blacklist:
-    def __init__(self, identifier:str=None, note:str=None):
+    def __init__(self, identifier: str = None, note: str = None):
         self.identifier = identifier  # whole link to the page / space
-        self.note = note # note why the page / space is blacklisted
+        self.note = note  # note why the page / space is blacklisted
 
 
 def read_blacklist_items() -> List[Blacklist]:
@@ -33,7 +34,6 @@ def read_blacklist_items() -> List[Blacklist]:
         total_blacklist.append(Blacklist(identifier, note))
 
     return total_blacklist
-
 
 
 if __name__ == "__main__":

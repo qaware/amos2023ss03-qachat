@@ -44,14 +44,17 @@ class DocumentEmbedder:
 
         last_updated = LastModified().get_last_update(data_preprocessor.get_source())
         current_time = datetime.now()
-        print("Start: Load data from " + data_preprocessor.get_source().value + " and start date " + last_updated)
+        print("Start: Load data from "
+              + data_preprocessor.get_source().value
+              + " and start date "
+              + last_updated.isoformat())
         all_changed_data = data_preprocessor.load_preprocessed_data(
             current_time, last_updated
         )
         print("Loaded " + str(len(all_changed_data)) + " documents.")
 
         # identify names and add name-tags before chunking and translation
-        #all_changed_data = self.identify_names(all_changed_data)
+        # all_changed_data = self.identify_names(all_changed_data)
 
         # transform long entries into multiple chunks and translation to english
         print("Start: transform_text_to_chunks")
@@ -59,7 +62,6 @@ class DocumentEmbedder:
         print("number of chunks to update:" + str(len(all_changed_data)))
         if len(all_changed_data) == 0:
             return
-
 
         self.vector_store.update_add_texts(all_changed_data, data_preprocessor.get_source())
 
