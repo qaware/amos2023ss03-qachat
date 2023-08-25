@@ -9,6 +9,23 @@ class LastModified:
     def __init__(self):
         self.db = VectorDB()
 
+    def init_class(self):
+        if not self.db.weaviate_client.schema.exists("LastModified"):
+            self.db.weaviate_client.schema.create_class(
+                {
+                    "class": "LastModified",
+                    "vectorizer": "none",
+                    "vectorIndexConfig": {
+                        "skip": True  # disable vectorindex
+                    },
+                    "properties": [
+                        {"name": "type", "dataType": ["text"]},
+                        {"name": "last_update", "dataType": ["text"]},
+                    ],
+                }
+            )
+
+
     def get_last_update(self, source: DataSource) -> datetime:
         where_filter_last_update = {
             "path": ["type"],

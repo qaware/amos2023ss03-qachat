@@ -13,9 +13,9 @@ import xx_ent_wiki_sm
 from spacy_langdetect import LanguageDetector
 
 from QAChat.Common.deepL_translator import DeepLTranslator
-from QAChat.VectorDB.vector_store import VectorStore
+from QAChat.VectorDB.embeddings import Embeddings
 from QAChat.VectorDB.vectordb import VectorDB
-from QAChat.Data_Processing.last_modified import LastModified
+from QAChat.VectorDB.last_modified import LastModified
 from QAChat.Data_Processing.preprocessor.data_information import DataInformation
 from QAChat.Data_Processing.preprocessor.data_preprocessor import DataPreprocessor
 from QAChat.Data_Processing.text_transformer import transform_text_to_chunks
@@ -23,7 +23,7 @@ from QAChat.Data_Processing.text_transformer import transform_text_to_chunks
 
 class DocumentEmbedder:
     def __init__(self):
-        self.vector_store = VectorStore()
+        self.vector_store = Embeddings()
         self.db = VectorDB()
 
         # name identification

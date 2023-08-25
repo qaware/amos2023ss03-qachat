@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2023 Felix Nützel
 import sys
+
+from QAChat.VectorDB.embeddings import Embeddings
+from QAChat.VectorDB.last_modified import LastModified
+from QAChat.VectorDB.loaded_channels import LoadedChannels
 from QAChat.VectorDB.vectordb import VectorDB
 
 db = VectorDB()
@@ -33,7 +37,9 @@ if __name__ == "__main__":
         print_content_length(*sys.argv[2:])
     elif arg == "CLEAR":
         db.clear_db()
-        db.init_db()
+        LastModified().init_class()
+        Embeddings().init_class()
+        LoadedChannels().init_class()
     else:
         print("Sorry, wrong argument.")
         sys.exit(1)

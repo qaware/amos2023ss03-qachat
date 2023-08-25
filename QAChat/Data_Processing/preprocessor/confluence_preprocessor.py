@@ -12,6 +12,7 @@ import requests
 from atlassian import Confluence
 
 from QAChat.Common.blacklist_reader import read_blacklist_items
+from QAChat.VectorDB.embeddings import Embeddings
 from QAChat.VectorDB.vectordb import VectorDB
 from QAChat.Data_Processing.pdf_reader import PDFReader
 from QAChat.Data_Processing.preprocessor.data_information import DataInformation, DataSource
@@ -40,6 +41,7 @@ if CONFLUENCE_SPACE_WHITELIST is None:
 class ConfluencePreprocessor(DataPreprocessor):
     def __init__(self):
         self.db = VectorDB()
+        self.embeddings = Embeddings()
         self.confluence = Confluence(
             url=CONFLUENCE_ADDRESS,
             username=CONFLUENCE_USERNAME,
@@ -282,7 +284,7 @@ class ConfluencePreprocessor(DataPreprocessor):
 
     def init_lookup_tables(self):
         # get the metadata of type Confluence from DB
-        data = self.db.get_all_for_type("confluence")
+        data = self.embeddings.get_all_for_type("confluence")
 
         for d in data:
             # add each ID in dict last_update_lookup

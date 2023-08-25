@@ -8,7 +8,14 @@ from langchain.vectorstores import Weaviate
 from typing import List, Dict, Any, Union
 
 
-class VectorStore:
+class EmbeddingType:
+    def __init__(self, page_id: str, chunk_id: str, last_update: str):
+        self.page_id = page_id
+        self.chunk_id = chunk_id
+        self.last_update = last_update
+
+
+class Embeddings:
     def __init__(self, embeddings_gpu=True):
         self.db = VectorDB()
 
@@ -27,6 +34,66 @@ class VectorStore:
             index_name="Embeddings",
             text_key="text",
         )
+
+    def init_class(self):
+        if not self.db.weaviate_client.schema.exists("Embeddings"):
+            self.db.weaviate_client.schema.create_class(
+                {
+                    "class": "Embeddings",
+                    "vectorizer": "none",  # We want to import your own vectors
+                    "vectorIndexType": "hnsw",  # default
+                    "vectorIndexConfig": {
+                        "distance": "cosine",
+                    },
+                    "invertedIndexConfig": {
+                        "stopwords": {
+                            "preset": "en",
+                            "additions": []
+                        }
+                    },
+                    "properties": [
+                        {"name": "type_id", "dataType": ["text"]},
+                        {
+                            "name": "chunk",
+                            "dataType": ["int"],
+                            "indexFilterable": False,  # disable filterable index for this property
+                            "indexSearchable": False,  # disable searchable index for this property
+                        },
+                        {"name": "type", "dataType": ["text"]},
+                        {"name": "last_changed", "dataType": ["text"]},
+                        {
+                            "name": "text",
+                            "dataType": ["text"],
+                            "tokenization": "word",
+                        },
+                        {
+                            "name": "link",
+                            "dataType": ["text"],
+                            "indexFilterable": False,  # disable filterable index for this property
+                            "indexSearchable": False,  # disable searchable index for this property
+                        },
+                    ],
+                }
+            )
+
+    def get_all_for_type(self, typestr: str) -> List[EmbeddingType]:
+        data = (
+            self.db.weaviate_client.query.get(
+                "Embeddings", ["type", "type_id", "last_changed"]
+            )
+            .with_where(
+                {"path": ["type"], "operator": "Equal", "valueString": typestr}
+            )
+            .do()["data"]["Get"]["Embeddings"]
+        )
+        embedded = []
+        for d in data:
+            page_id = d["id"].split("_")[0]
+            chunk_id = d["id"].split("_")[1]
+            last_update = d["last_changed"]
+            embedded.append(EmbeddingType(page_id, chunk_id, last_update))
+
+        return embedded
 
     def update_add_texts(self, all_changed_data, typ):
         print("delete texts")

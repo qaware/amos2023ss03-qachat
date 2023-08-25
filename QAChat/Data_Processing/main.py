@@ -7,8 +7,6 @@ from document_embedder import DocumentEmbedder
 from QAChat.VectorDB.vectordb import VectorDB
 
 if __name__ == "__main__":
-    VectorDB().init_db()
-
     for arg in sys.argv[1:]:
         if arg == "DUMMY":
             # if yes, only store dummy data

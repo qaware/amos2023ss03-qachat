@@ -7,14 +7,6 @@ import weaviate
 from prettytable import PrettyTable
 import re
 
-
-class EmbeddingType:
-    def __init__(self, page_id: str, chunk_id: str, last_update: str):
-        self.page_id = page_id
-        self.chunk_id = chunk_id
-        self.last_update = last_update
-
-
 class VectorDB:
     def __init__(self):
         WEAVIATE_URL = os.getenv("WEAVIATE_URL")
@@ -90,96 +82,8 @@ class VectorDB:
 
         print_data(index_name, properties, result)
 
-    def get_all_for_type(self, typestr: str) -> List[EmbeddingType]:
-        data = (
-            self.weaviate_client.query.get(
-                "Embeddings", ["type", "type_id", "last_changed"]
-            )
-            .with_where(
-                {"path": ["type"], "operator": "Equal", "valueString": typestr}
-            )
-            .do()["data"]["Get"]["Embeddings"]
-        )
-        embedded = []
-        for d in data:
-            page_id = d["id"].split("_")[0]
-            chunk_id = d["id"].split("_")[1]
-            last_update = d["last_changed"]
-            embedded.append(EmbeddingType(page_id, chunk_id, last_update))
-
-        return embedded
-
     def clear_db(self):
         return self.weaviate_client.schema.delete_all()
-
-    def init_db(self):
-        if not self.weaviate_client.schema.exists("Embeddings"):
-            self.weaviate_client.schema.create_class(
-                {
-                    "class": "Embeddings",
-                    "vectorizer": "none",  # We want to import your own vectors
-                    "vectorIndexType": "hnsw",  # default
-                    "vectorIndexConfig": {
-                        "distance": "cosine",
-                    },
-                    "invertedIndexConfig": {
-                        "stopwords": {
-                            "preset": "en",
-                            "additions": []
-                        }
-                    },
-                    "properties": [
-                        {"name": "type_id", "dataType": ["text"]},
-                        {
-                            "name": "chunk",
-                            "dataType": ["int"],
-                            "indexFilterable": False,  # disable filterable index for this property
-                            "indexSearchable": False,  # disable searchable index for this property
-                        },
-                        {"name": "type", "dataType": ["text"]},
-                        {"name": "last_changed", "dataType": ["text"]},
-                        {
-                            "name": "text",
-                            "dataType": ["text"],
-                            "tokenization": "word",
-                        },
-                        {
-                            "name": "link",
-                            "dataType": ["text"],
-                            "indexFilterable": False,  # disable filterable index for this property
-                            "indexSearchable": False,  # disable searchable index for this property
-                        },
-                    ],
-                }
-            )
-        if not self.weaviate_client.schema.exists("LastModified"):
-            self.weaviate_client.schema.create_class(
-                {
-                    "class": "LastModified",
-                    "vectorizer": "none",
-                    "vectorIndexConfig": {
-                        "skip": True  # disable vectorindex
-                    },
-                    "properties": [
-                        {"name": "type", "dataType": ["text"]},
-                        {"name": "last_update", "dataType": ["text"]},
-                    ],
-                }
-            )
-
-        if not self.weaviate_client.schema.exists("LoadedChannels"):
-            self.weaviate_client.schema.create_class(
-                {
-                    "class": "LoadedChannels",
-                    "vectorIndexConfig": {
-                        "skip": "true"  # disable vectorindex
-                    },
-                    "properties": [
-                        {"name": "channel_id", "dataType": ["text"]},
-                        {"name": "channel_name", "dataType": ["text"]},
-                    ],
-                }
-            )
 
 
 def print_data(index_name, properties, result):
