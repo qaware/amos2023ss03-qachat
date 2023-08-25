@@ -14,6 +14,7 @@ from spacy_langdetect import LanguageDetector
 
 from QAChat.Common.deepL_translator import DeepLTranslator
 from QAChat.VectorDB.embeddings import Embeddings
+from QAChat.VectorDB.vector_store import VectorStore
 from QAChat.VectorDB.vectordb import VectorDB
 from QAChat.VectorDB.last_modified import LastModified
 from QAChat.Data_Processing.preprocessor.data_information import DataInformation
@@ -23,7 +24,8 @@ from QAChat.Data_Processing.text_transformer import transform_text_to_chunks
 
 class DocumentEmbedder:
     def __init__(self):
-        self.vector_store = Embeddings()
+        self.embeddings = Embeddings()
+        self.vector_store = VectorStore()
         self.db = VectorDB()
 
         # name identification
@@ -36,12 +38,6 @@ class DocumentEmbedder:
         self.translator = DeepLTranslator()
 
     def store_information_in_database(self, data_preprocessor: DataPreprocessor):
-        #        print(
-        #            self.db.weaviate_client.query.get("Embeddings", ["type_id", "text"])
-        #            .do()
-        #            .items()
-        #        )
-
         last_updated = LastModified().get_last_update(data_preprocessor.get_source())
         current_time = datetime.now()
         print("Start: Load data from "

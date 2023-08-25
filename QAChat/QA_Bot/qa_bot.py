@@ -6,15 +6,15 @@
 
 from time import time
 
-from deepl import TextResult
 from huggingface_hub import hf_hub_download
 from langchain import LlamaCpp, PromptTemplate
 
-from QAChat.VectorDB.embeddings import Embeddings
-from QAChat.Common.deepL_translator import DeepLTranslator
+from QAChat.Common.deepL_translator import DeepLTranslator, Result
 from QAChat.QA_Bot.stream_LLM_callback_handler import StreamLLMCallbackHandler
 
 from typing import List
+
+from QAChat.VectorDB.vector_store import VectorStore
 
 print("Init Lock")
 from threading import Lock
@@ -31,7 +31,7 @@ class QABot:
     ):
         self.answer = None
         self.context = None
-        self.vector_store = Embeddings()
+        self.vector_store = VectorStore()
 
         self.model = model
         if model is None:
@@ -109,7 +109,7 @@ class QABot:
             )
             return answer.generations[0][0].text.strip()
 
-    def translate_text(self, question, language="EN-US") -> TextResult:
+    def translate_text(self, question, language="EN-US") -> Result:
         return self.translator.translate_to(
             question, language, use_spacy_to_detect_lang_if_needed=False
         )

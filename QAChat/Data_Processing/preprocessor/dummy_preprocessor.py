@@ -26,6 +26,7 @@ class DummyPreprocessor(DataPreprocessor):
             raw_data.append(
                 DataInformation(
                     id=f"{index}",
+                    chunk=0,
                     last_changed=datetime(2021, 1, 1),
                     typ=DataSource.DUMMY,
                     text=row["Answer"],
@@ -33,7 +34,4 @@ class DummyPreprocessor(DataPreprocessor):
                 )
             )
 
-        return [
-            data
-            for data in raw_data
-        ]
+        return [data for data in raw_data]

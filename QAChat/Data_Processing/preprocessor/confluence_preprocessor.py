@@ -47,8 +47,6 @@ class ConfluencePreprocessor(DataPreprocessor):
             username=CONFLUENCE_USERNAME,
             password=CONFLUENCE_TOKEN,
         )
-        self.db = VectorDB()
-
         self.pdf_reader = PDFReader()
         self.__all_spaces = []
         self.all_pages_id = []
@@ -56,7 +54,6 @@ class ConfluencePreprocessor(DataPreprocessor):
         self.restricted_pages = []
         self.restricted_spaces = []
         self.last_update_lookup = dict()
-        self.chunk_id_lookup_table = dict()
         self.g_docs_proc = GoogleDocPreProcessor()
 
     def get_source(self) -> DataSource:
@@ -177,6 +174,7 @@ class ConfluencePreprocessor(DataPreprocessor):
             self.all_page_information.append(
                 DataInformation(
                     id=page_id,
+                    chunk=0,
                     last_changed=last_changed,
                     typ=DataSource.CONFLUENCE,
                     text=text,
@@ -284,7 +282,8 @@ class ConfluencePreprocessor(DataPreprocessor):
 
     def init_lookup_tables(self):
         # get the metadata of type Confluence from DB
-        data = self.embeddings.get_all_for_type("confluence")
+        data = self.embeddings.get_all_for_documenttype("confluence")
+        print("loaded " + str(len(data)) + " embeddings from DB for document type 'confluence'")
 
         for d in data:
             # add each ID in dict last_update_lookup
@@ -293,13 +292,6 @@ class ConfluencePreprocessor(DataPreprocessor):
                     d.last_update.split("T")[0], "%Y-%m-%d"
                 )
 
-            # add max of chunk ID to chunk_id_lookup_table
-            if d.page_id not in self.chunk_id_lookup_table:
-                self.chunk_id_lookup_table[d.page_id] = d.chunk_id
-            else:
-                if d.chunk_id > self.chunk_id_lookup_table[d.page_id]:
-                    self.chunk_id_lookup_table[d.page_id] = d.chunk_id
-
     def filter_pages(self):
         to_delete = []
         for i in self.all_page_information:
@@ -307,7 +299,7 @@ class ConfluencePreprocessor(DataPreprocessor):
                 if (
                         i.last_changed > self.last_update_lookup[i.id]
                 ):  # if there is a change in the page
-                    self.remove_from_db(i.id)  # remove from DB
+                    self.embeddings.remove_id(i.id)  # remove from DB
                     self.last_update_lookup[i.id] = None  # make the dict's entry None -> To detect remove page
                 elif (
                         i.last_changed == self.last_update_lookup[i.id]
@@ -320,27 +312,13 @@ class ConfluencePreprocessor(DataPreprocessor):
             #    to_delete.append(i)
 
         for i in to_delete:
-            self.all_page_information.remove(
-                i
-            )  # remove the page where no changes from the internal list
+            self.all_page_information.remove(i)  # remove the page where no changes from the internal list
 
         for i in self.last_update_lookup:
             if (
                     self.last_update_lookup[i] is not None
             ):  # check which entry is not None -> Page is deleted from website
-                self.remove_from_db(i)  # remove it from DB
-
-    def remove_from_db(self, id):
-        # loop over max number in chunk id and remove all the rows from DB
-        for i in range(0, int(self.chunk_id_lookup_table[id]) + 1):
-            self.db.weaviate_client.batch.delete_objects(
-                "Embeddings",
-                {
-                    "path": ["type_id"],
-                    "operator": "Equal",
-                    "valueString": str(id) + "_" + str(i),
-                },
-            )
+                self.embeddings.remove_id(i)  # remove it from DB
 
     def create_whitelist(self):
         spaces = self.get_all_pages_for_whitelist()
@@ -370,8 +348,10 @@ class ConfluencePreprocessor(DataPreprocessor):
                 # exclude personal/user spaces only global spaces
                 if space["type"] == "global":
                     # exclude blacklisted spaces
-                    if space["key"] not in self.restricted_spaces and space["key"].startswith("QAWARE") or space[
-                        "key"].startswith("QAware"):
+                    if (space["key"] not in
+                            self.restricted_spaces
+                            and space["key"].startswith("QAWARE")
+                            or space["key"].startswith("QAware")):
                         whitelist.append(space)
 
             # Check if there are more spaces
