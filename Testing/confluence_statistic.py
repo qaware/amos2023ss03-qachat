@@ -12,7 +12,7 @@ class Statistic:
         self.documents = processor.load_preprocessed_data(
             datetime.now(),
             datetime(1970, 1, 1),
-            do_filter=False
+            do_remove=False
         )
         print("Loaded " + str(len(self.documents)) + " documents.")
         for doc in self.documents:
@@ -27,17 +27,17 @@ class Statistic:
         for space in self.spaces:
             pages = []
             for data in self.documents:
-                if data.space == space["key"]:
+                if data.space == space:
                     pages.append({
                         "page_id": data.id,
                         "page_title": data.title,
                         "page_content": data.text,
                         "page_length": len(data.text),
                         "page_cost": len(data.text) * self.costs_per_char,
-                        "page_link": f"https://qaware-confluence.atlassian.net/wiki/spaces/{space['key']}/pages/{data.id}",
+                        "page_link": f"https://qaware-confluence.atlassian.net/wiki/spaces/{space}/pages/{data.id}",
                     })
             self.statistic.append({
-                "space_name": space["key"],
+                "space_name": space,
                 "pages": pages,
                 "space_length": sum([page["page_length"] for page in pages]),
                 "space_cost": sum([page["page_cost"] for page in pages])

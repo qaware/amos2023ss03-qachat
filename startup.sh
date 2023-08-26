@@ -41,7 +41,7 @@ do
         2) ${PYTHONEXEC} QAChat/VectorDB/db_cli.py INFO LastModified; break;;
         3) ${PYTHONEXEC} QAChat/VectorDB/db_cli.py INFO Embeddings; break;;
         4) ${PYTHONEXEC} QAChat/VectorDB/db_cli.py CLEAR; break;;
-        5) mkdir -p statistics && ${PYTHONEXEC} QAChat/Data_Processing/confluence_statistic.py; break;;
+        5) mkdir -p statistics && ${PYTHONEXEC} Testing/confluence_statistic.py; break;;
         6) ${PYTHONEXEC} QAChat/Data_Processing/main.py DUMMY; break;;
         7) ${PYTHONEXEC} QAChat/Data_Processing/main.py CONFLUENCE; break;;
         8) ${PYTHONEXEC} QAChat/Slack_Bot/qa_agent.py; break;;

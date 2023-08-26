@@ -6,7 +6,7 @@ import io
 import os
 import re
 from datetime import datetime
-from typing import List
+from typing import List, Dict
 
 import requests
 from atlassian import Confluence
@@ -43,23 +43,16 @@ class ConfluencePreprocessor(DataPreprocessor):
         )
         self.pdf_reader = PDFReader()
         self.filter_manager = FilterManager()
-
-        self.__all_spaces = []
-        self.all_pages_id = []
-        self.all_page_information = []
-
-        self.last_update_lookup = dict()
         self.g_docs_proc = GoogleDocPreProcessor()
+        self.all_page_information : List[DataInformation] = []
 
     def get_source(self) -> DataSource:
         return DataSource.CONFLUENCE
 
-    def get_all_spaces(self):
+    def get_all_spaces(self) -> List[str]:
         start = 0
         limit = 500
         all_spaces = []
-        if len(self.__all_spaces) > 0:
-            return self.__all_spaces
         # Get all spaces first
         while True:
             # Get all confluence spaces from the confluence instance
@@ -71,7 +64,7 @@ class ConfluencePreprocessor(DataPreprocessor):
                 if space["type"] == "global":
                     # exclude blacklisted spaces
                     if self.filter_manager.is_valid_space(space["key"]):
-                        all_spaces.append(space)
+                        all_spaces.append(space["key"])
 
             # Check if there are more spaces
             if len(spaces_data) < limit:
@@ -79,86 +72,86 @@ class ConfluencePreprocessor(DataPreprocessor):
             start = start + limit
         return all_spaces
 
-    def get_all_page_ids_from_spaces(self):
+    def get_page_ids_from_spaces(self, space_key: str) -> List[str]:
         # Get all pages from a space
-        for space in self.__all_spaces:
-            start = 0
-            limit = 100
+        start = 0
+        limit = 100
 
-            while True:
-                pages_data = self.confluence.get_all_pages_from_space(
-                    space["key"],
-                    start=start,
-                    limit=limit,
-                    status=None,
-                    expand=None,
-                    content_type="page",
-                )
-                #  Get all page id
-                for page in pages_data:
-                    if not self.filter_manager.is_valid_page(page["id"]):
-                        self.all_pages_id.append(page["id"])
+        page_ids: List[str] = []
 
-                # Check if there are more pages
-                if len(pages_data) < limit:
-                    break
-                start = start + limit
-
-    def get_relevant_data_from_pages(self):
-        # Get all relevant information from each page
-        for page_id in self.all_pages_id:
-            # Get page by id
-
-            page_with_body = self.confluence.get_page_by_id(
-                page_id, expand="body.storage, version", status=None, version=None
+        while True:
+            pages_data = self.confluence.get_all_pages_from_space(
+                space_key,
+                start=start,
+                limit=limit,
+                status=None,
+                expand=None,
+                content_type="page",
             )
-            page_info = self.confluence.get_page_by_id(
-                page_id, expand=None, status=None, version=None
+            #  Get all page id
+            for page in pages_data:
+                if self.filter_manager.is_valid_page(page["id"]):
+                    page_ids.append(page["id"])
+
+            # Check if there are more pages
+            if len(pages_data) < limit:
+                break
+            start = start + limit
+
+        return page_ids
+
+    def get_relevant_data_from_page(self, page_id):
+        # Get page by id
+        page_with_body = self.confluence.get_page_by_id(
+            page_id, expand="body.storage, version", status=None, version=None
+        )
+        page_info = self.confluence.get_page_by_id(
+            page_id, expand=None, status=None, version=None
+        )
+        # Set final parameters for DataInformation
+        last_changed = self.get_last_modified_formatted_date(page_info)
+        text = self.get_raw_text_from_page(page_with_body)
+
+        # skip pages with less than 5 characters
+        if len(text) < 5:
+            return
+
+        # get googledoc url:
+        urls = re.findall(r"https?://docs\.google\.com\S+", text)
+
+        # get content from googledoc
+        # commented out because we don't have access tho client's google drive
+        # google_doc_content = self.get_content_from_google_drive(urls)
+
+        # get content from confluence attachments
+        pdf_content = ""  # self.get_content_from_page_attachments(page_id)
+
+        # replace consecutive occurrences of \n into one \n
+        text = re.sub(r"\n+", "\n", text)
+        # replace " \n" with "\n"
+        text = re.sub(r" \n", "\n", text)
+        # remove leading \n
+        text = re.sub(r"^\n", "", text)
+
+        # commented out because we don't have access tho client's google drive
+        # + " " + google_doc_content
+        # + " " + pdf_content,
+
+        # print(f"Länge {page_id}: %d \n" % len(text))
+        # Add Page content to list of DataInformation
+        # print(page_info["_links"]["base"] + page_info["_links"]["webui"].split("overview")[0])
+        self.all_page_information.append(
+            DataInformation(
+                id=page_id,
+                chunk=0,
+                last_changed=last_changed,
+                typ=DataSource.CONFLUENCE,
+                text=text,
+                title=page_info["title"],
+                space=page_info["space"]["key"],
+                link=page_info["_links"]["base"] + page_info["_links"]["webui"].split("overview")[0],
             )
-            # Set final parameters for DataInformation
-            last_changed = self.get_last_modified_formatted_date(page_info)
-            text = self.get_raw_text_from_page(page_with_body)
-
-            # skip pages with less than 5 characters
-            if len(text) < 5:
-                continue
-
-            # get googledoc url:
-            urls = re.findall(r"https?://docs\.google\.com\S+", text)
-
-            # get content from googledoc
-            # commented out because we don't have access tho client's google drive
-            # google_doc_content = self.get_content_from_google_drive(urls)
-
-            # get content from confluence attachments
-            pdf_content = ""  # self.get_content_from_page_attachments(page_id)
-
-            # replace consecutive occurrences of \n into one \n
-            text = re.sub(r"\n+", "\n", text)
-            # replace " \n" with "\n"
-            text = re.sub(r" \n", "\n", text)
-            # remove leading \n
-            text = re.sub(r"^\n", "", text)
-
-            # commented out because we don't have access tho client's google drive
-            # + " " + google_doc_content
-            # + " " + pdf_content,
-
-            # print(f"Länge {page_id}: %d \n" % len(text))
-            # Add Page content to list of DataInformation
-            # print(page_info["_links"]["base"] + page_info["_links"]["webui"].split("overview")[0])
-            self.all_page_information.append(
-                DataInformation(
-                    id=page_id,
-                    chunk=0,
-                    last_changed=last_changed,
-                    typ=DataSource.CONFLUENCE,
-                    text=text,
-                    title=page_info["title"],
-                    space=page_info["space"]["key"],
-                    link=page_info["_links"]["base"] + page_info["_links"]["webui"].split("overview")[0],
-                )
-            )
+        )
 
     def get_last_modified_formatted_date(self, page_info) -> datetime:
         # Get date of last modified page
@@ -246,41 +239,54 @@ class ConfluencePreprocessor(DataPreprocessor):
         return pdf_content
 
     def load_preprocessed_data(
-            self, end_of_timeframe: datetime, start_of_timeframe: datetime, do_filter: bool = True
+            self, end_of_timeframe: datetime, start_of_timeframe: datetime, do_remove: bool = True
     ) -> List[DataInformation]:
-        self.init_lookup_tables()
-        self.__all_spaces = self.get_all_spaces()
-        self.get_all_page_ids_from_spaces()
-        self.get_relevant_data_from_pages()
-        if do_filter: self.filter_pages()
+
+        all_spaces: List[str] = self.get_all_spaces()
+        all_pages_ids: List[str] = []
+        for space in all_spaces:
+            print("Load Space: " + space)
+            all_pages_ids = all_pages_ids + self.get_page_ids_from_spaces(space)
+
+        for page_id in all_pages_ids:
+            self.get_relevant_data_from_page(page_id)
+
+        if do_remove:
+            last_update_lookup: Dict[str, datetime] = self.load_embedded_data()
+            self.filter_pages(last_update_lookup)
+
         return [data for data in self.all_page_information]
 
-    def init_lookup_tables(self):
+    def load_embedded_data(self) -> Dict[str, datetime]:
         # get the metadata of type Confluence from DB
         data = self.embeddings.get_all_for_documenttype("confluence")
         print("loaded " + str(len(data)) + " embeddings from DB for document type 'confluence'")
 
+        last_update_lookup = dict()
+
         for d in data:
             # add each ID in dict last_update_lookup
-            if d.page_id not in self.last_update_lookup:
-                self.last_update_lookup[d.page_id] = datetime.strptime(
+            if d.page_id not in last_update_lookup:
+                last_update_lookup[d.page_id] = datetime.strptime(
                     d.last_update.split("T")[0], "%Y-%m-%d"
                 )
 
-    def filter_pages(self):
+        return last_update_lookup
+
+    def filter_pages(self, last_update_lookup: dict):
         to_delete = []
         for i in self.all_page_information:
-            if i.id in self.last_update_lookup:  # if page is already in DB
+            if i.id in last_update_lookup:  # if page is already in DB
                 if (
-                        i.last_changed > self.last_update_lookup[i.id]
+                        i.last_changed > last_update_lookup[i.id]
                 ):  # if there is a change in the page
                     self.embeddings.remove_id(i.id)  # remove from DB
-                    self.last_update_lookup[i.id] = None  # make the dict's entry None -> To detect remove page
+                    last_update_lookup[i.id] = None  # make the dict's entry None -> To detect remove page
                 elif (
-                        i.last_changed == self.last_update_lookup[i.id]
+                        i.last_changed == last_update_lookup[i.id]
                 ):  # if no change in the page
                     to_delete.append(i)  # append in the list
-                    self.last_update_lookup[
+                    last_update_lookup[
                         i.id
                     ] = None  # make the dict's entry None -> To detect remove page
             # if i.last_changed.year >= 2022:
@@ -289,9 +295,9 @@ class ConfluencePreprocessor(DataPreprocessor):
         for i in to_delete:
             self.all_page_information.remove(i)  # remove the page where no changes from the internal list
 
-        for i in self.last_update_lookup:
+        for i in last_update_lookup:
             if (
-                    self.last_update_lookup[i] is not None
+                    last_update_lookup[i] is not None
             ):  # check which entry is not None -> Page is deleted from website
                 self.embeddings.remove_id(i)  # remove it from DB
 
@@ -303,7 +309,9 @@ if __name__ == "__main__":
     format_string = "%Y-%m-%d"
 
     z = cp.load_preprocessed_data(
-        datetime.now(), datetime.strptime(date_string, format_string)
+        datetime.now(),
+        datetime.strptime(date_string, format_string),
+        do_remove=False
     )
     for i in z:
         print(i.space)
