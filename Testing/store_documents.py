@@ -6,6 +6,8 @@ import json
 from datetime import datetime
 from enum import Enum
 
+from QAChat.Common.deepL_translator import DeepLTranslator
+
 if __name__ == "__main__":
 
     for arg in sys.argv[1:]:
@@ -41,6 +43,10 @@ if __name__ == "__main__":
             nchars += len(doc.text)
 
         print("Loaded " + str(len(documents)) + " documents with " + str(nchars) + " characters.")
+
+        #translator = DeepLTranslator()
+        #for doc in documents:
+        #    doc.text = translator.translate_to(doc.text, "EN-US")
 
         def dumper(obj):
             if isinstance(obj, datetime):
