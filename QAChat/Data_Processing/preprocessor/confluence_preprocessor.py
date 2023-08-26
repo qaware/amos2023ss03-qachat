@@ -11,9 +11,8 @@ from typing import List
 import requests
 from atlassian import Confluence
 
-from QAChat.Common.blacklist_reader import read_blacklist_items
+from QAChat.Data_Processing.preprocessor.filter_manager import FilterManager
 from QAChat.VectorDB.embeddings import Embeddings
-from QAChat.VectorDB.vectordb import VectorDB
 from QAChat.Data_Processing.pdf_reader import PDFReader
 from QAChat.Data_Processing.preprocessor.data_information import DataInformation, DataSource
 from QAChat.Data_Processing.preprocessor.data_preprocessor import DataPreprocessor
@@ -33,14 +32,9 @@ CONFLUENCE_TOKEN = os.getenv("CONFLUENCE_TOKEN")
 if CONFLUENCE_TOKEN is None:
     raise ValueError("Please set CONFLUENCE_TOKEN environment variable")
 
-CONFLUENCE_SPACE_WHITELIST = os.getenv("CONFLUENCE_SPACE_WHITELIST").split(",")
-if CONFLUENCE_SPACE_WHITELIST is None:
-    raise ValueError("Please set CONFLUENCE_SPACE_WHITELIST environment variable")
-
 
 class ConfluencePreprocessor(DataPreprocessor):
     def __init__(self):
-        self.db = VectorDB()
         self.embeddings = Embeddings()
         self.confluence = Confluence(
             url=CONFLUENCE_ADDRESS,
@@ -48,32 +42,19 @@ class ConfluencePreprocessor(DataPreprocessor):
             password=CONFLUENCE_TOKEN,
         )
         self.pdf_reader = PDFReader()
+        self.filter_manager = FilterManager()
+
         self.__all_spaces = []
         self.all_pages_id = []
         self.all_page_information = []
-        self.restricted_pages = []
-        self.restricted_spaces = []
+
         self.last_update_lookup = dict()
         self.g_docs_proc = GoogleDocPreProcessor()
 
     def get_source(self) -> DataSource:
         return DataSource.CONFLUENCE
 
-    def init_blacklist(self):
-        # Retrieve blacklist data from file
-        blacklist = read_blacklist_items()
-
-        # Extract restricted spaces and restricted pages from the blacklist data
-        for entries in blacklist:
-            if "/pages/" in entries.identifier:
-                # Split by slash and get the page id, https://.../pages/PAGE_ID
-                self.restricted_pages.append(entries.identifier.split("/")[7])
-            else:
-                # Split by slash and get the space name, https://.../space/SPACE_NAME
-                self.restricted_spaces.append(entries.identifier.split("/")[5])
-
     def get_all_spaces(self):
-        print("Read the following confluence spaces:", CONFLUENCE_SPACE_WHITELIST)
         start = 0
         limit = 500
         all_spaces = []
@@ -81,11 +62,6 @@ class ConfluencePreprocessor(DataPreprocessor):
             return self.__all_spaces
         # Get all spaces first
         while True:
-            # url:      to the confluence parameter
-            # username: to your email used in confluence
-            # password: if confluence is cloud set Confluence API Token https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/
-            #           if confluence is server set your password
-
             # Get all confluence spaces from the confluence instance
             spaces_data = self.confluence.get_all_spaces(
                 start=start, limit=limit, expand=None
@@ -94,7 +70,7 @@ class ConfluencePreprocessor(DataPreprocessor):
                 # exclude personal/user spaces only global spaces
                 if space["type"] == "global":
                     # exclude blacklisted spaces
-                    if space["key"] not in self.restricted_spaces and space["key"] in CONFLUENCE_SPACE_WHITELIST:
+                    if self.filter_manager.is_valid_space(space["key"]):
                         all_spaces.append(space)
 
             # Check if there are more spaces
@@ -120,7 +96,7 @@ class ConfluencePreprocessor(DataPreprocessor):
                 )
                 #  Get all page id
                 for page in pages_data:
-                    if page["id"] not in self.restricted_pages:
+                    if not self.filter_manager.is_valid_page(page["id"]):
                         self.all_pages_id.append(page["id"])
 
                 # Check if there are more pages
@@ -273,7 +249,6 @@ class ConfluencePreprocessor(DataPreprocessor):
             self, end_of_timeframe: datetime, start_of_timeframe: datetime, do_filter: bool = True
     ) -> List[DataInformation]:
         self.init_lookup_tables()
-        self.init_blacklist()
         self.__all_spaces = self.get_all_spaces()
         self.get_all_page_ids_from_spaces()
         self.get_relevant_data_from_pages()
@@ -320,46 +295,6 @@ class ConfluencePreprocessor(DataPreprocessor):
             ):  # check which entry is not None -> Page is deleted from website
                 self.embeddings.remove_id(i)  # remove it from DB
 
-    def create_whitelist(self):
-        spaces = self.get_all_pages_for_whitelist()
-        output = ""  # TODO: current output for the whitelist
-        for space in spaces:
-            output += space["key"] + ","
-        print(output)
-
-    def get_all_pages_for_whitelist(self):
-        start = 0
-        limit = 500
-
-        whitelist = []
-        # Get all spaces first
-        while True:
-            # url:      to the confluence parameter
-            # username: to your email used in confluence
-            # password: if confluence is cloud set Confluence API Token https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/
-            #           if confluence is server set your password
-
-            # Get all confluence spaces from the confluence instance
-            spaces = self.confluence.get_all_spaces(
-                start=start, limit=limit, expand=None
-            )
-
-            for space in spaces["results"]:
-                # exclude personal/user spaces only global spaces
-                if space["type"] == "global":
-                    # exclude blacklisted spaces
-                    if (space["key"] not in
-                            self.restricted_spaces
-                            and space["key"].startswith("QAWARE")
-                            or space["key"].startswith("QAware")):
-                        whitelist.append(space)
-
-            # Check if there are more spaces
-            if len(spaces) < limit:
-                break
-            start = start + limit
-        return whitelist
-
 
 if __name__ == "__main__":
     cp = ConfluencePreprocessor()
@@ -379,5 +314,3 @@ if __name__ == "__main__":
         print(i.typ)
         print(i.last_changed)
         print("----" * 5)
-
-    cp.create_whitelist()

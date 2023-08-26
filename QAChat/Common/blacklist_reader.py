@@ -1,22 +1,17 @@
 import os
 from typing import List
 
-BLACKLIST_PATH = os.getenv("BLACKLIST_PATH")
-if BLACKLIST_PATH is None:
-    raise Exception("BLACKLIST_PATH is not set")
-
-
 class Blacklist:
     def __init__(self, identifier: str = None, note: str = None):
         self.identifier = identifier  # whole link to the page / space
         self.note = note  # note why the page / space is blacklisted
 
 
-def read_blacklist_items() -> List[Blacklist]:
+def read_blacklist_items(filename: str) -> List[Blacklist]:
     if os.getcwd().split("/")[-1] == "Common" or os.getcwd().split("/")[-1] == "Data_Processing":
-        path = f"../../{BLACKLIST_PATH}"
+        path = f"../../{filename}"
     else:
-        path = f"{BLACKLIST_PATH}"
+        path = f"{filename}"
     with open(path, "r") as f:
         lines = f.readlines()
 
