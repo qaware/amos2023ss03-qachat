@@ -17,7 +17,7 @@ from QAChat.Data_Processing.pdf_reader import PDFReader
 from QAChat.Data_Processing.preprocessor.data_information import DataInformation, DataSource
 from QAChat.Data_Processing.preprocessor.data_preprocessor import DataPreprocessor
 from QAChat.Data_Processing.preprocessor.google_doc_preprocessor import GoogleDocPreProcessor
-from QAChat.Data_Processing.preprocessor.html_to_text import get_text
+from QAChat.Data_Processing.preprocessor.html_to_text import get_text, get_text_markdonify
 
 # Get Confluence API credentials from environment variables
 CONFLUENCE_ADDRESS = os.getenv("CONFLUENCE_ADDRESS")
@@ -44,7 +44,7 @@ class ConfluencePreprocessor(DataPreprocessor):
         self.pdf_reader = PDFReader()
         self.filter_manager = FilterManager()
         self.g_docs_proc = GoogleDocPreProcessor()
-        self.all_page_information : List[DataInformation] = []
+        self.page_information : List[DataInformation] = []
 
     def get_source(self) -> DataSource:
         return DataSource.CONFLUENCE
@@ -100,24 +100,26 @@ class ConfluencePreprocessor(DataPreprocessor):
 
         return page_ids
 
-    def get_relevant_data_from_page(self, page_id):
+    def get_data_from_page(self, page_id) -> DataInformation:
         # Get page by id
         page_with_body = self.confluence.get_page_by_id(
-            page_id, expand="body.storage, version", status=None, version=None
+            page_id,
+            expand="body.storage, version",
+            status=None,
+            version=None
         )
         page_info = self.confluence.get_page_by_id(
-            page_id, expand=None, status=None, version=None
+            page_id,
+            expand=None,
+            status=None,
+            version=None
         )
         # Set final parameters for DataInformation
         last_changed = self.get_last_modified_formatted_date(page_info)
         text = self.get_raw_text_from_page(page_with_body)
 
-        # skip pages with less than 5 characters
-        if len(text) < 5:
-            return
-
         # get googledoc url:
-        urls = re.findall(r"https?://docs\.google\.com\S+", text)
+        # urls = re.findall(r"https?://docs\.google\.com\S+", text)
 
         # get content from googledoc
         # commented out because we don't have access tho client's google drive
@@ -140,8 +142,7 @@ class ConfluencePreprocessor(DataPreprocessor):
         # print(f"Länge {page_id}: %d \n" % len(text))
         # Add Page content to list of DataInformation
         # print(page_info["_links"]["base"] + page_info["_links"]["webui"].split("overview")[0])
-        self.all_page_information.append(
-            DataInformation(
+        return DataInformation(
                 id=page_id,
                 chunk=0,
                 last_changed=last_changed,
@@ -151,7 +152,6 @@ class ConfluencePreprocessor(DataPreprocessor):
                 space=page_info["space"]["key"],
                 link=page_info["_links"]["base"] + page_info["_links"]["webui"].split("overview")[0],
             )
-        )
 
     def get_last_modified_formatted_date(self, page_info) -> datetime:
         # Get date of last modified page
@@ -171,7 +171,8 @@ class ConfluencePreprocessor(DataPreprocessor):
         # Get page content
         page_in_html = page_with_body["body"]["storage"]["value"]
         # return page_in_html
-        return get_text(page_in_html)
+        #return get_text(page_in_html)
+        return get_text_markdonify(page_in_html)
 
     def get_content_from_google_drive(self, urls):
         pdf_content = ""
@@ -230,11 +231,11 @@ class ConfluencePreprocessor(DataPreprocessor):
                             try:
                                 pdf_content += self.pdf_reader.read_pdf(pdf_bytes) + " "
                                 print(
-                                    f"Content: {pdf_content}, Page id: {page_id}, Attachment: {attachment['title']}, Link: {download_link}, Space: {self.all_page_information[-1].space}")
+                                    f"Content: {pdf_content}, Page id: {page_id}, Attachment: {attachment['title']}, Link: {download_link}, Space: {self.page_information[-1].space}")
                             except Exception as e:
                                 print(f"Error while reading pdf: {e}")
                                 print(
-                                    f"Page id: {page_id}, Attachment: {attachment['title']}, Link: {download_link}, Space: {self.all_page_information[-1].space}")
+                                    f"Page id: {page_id}, Attachment: {attachment['title']}, Link: {download_link}, Space: {self.page_information[-1].space}")
                                 continue
         return pdf_content
 
@@ -243,19 +244,18 @@ class ConfluencePreprocessor(DataPreprocessor):
     ) -> List[DataInformation]:
 
         all_spaces: List[str] = self.get_all_spaces()
-        all_pages_ids: List[str] = []
         for space in all_spaces:
             print("Load Space: " + space)
-            all_pages_ids = all_pages_ids + self.get_page_ids_from_spaces(space)
-
-        for page_id in all_pages_ids:
-            self.get_relevant_data_from_page(page_id)
+            page_ids : List[str] =  self.get_page_ids_from_spaces(space)
+            for page_id in page_ids:
+                page = self.get_data_from_page(page_id)
+                self.page_information.append(page)
 
         if do_remove:
             last_update_lookup: Dict[str, datetime] = self.load_embedded_data()
             self.filter_pages(last_update_lookup)
 
-        return [data for data in self.all_page_information]
+        return [data for data in self.page_information]
 
     def load_embedded_data(self) -> Dict[str, datetime]:
         # get the metadata of type Confluence from DB
@@ -275,31 +275,30 @@ class ConfluencePreprocessor(DataPreprocessor):
 
     def filter_pages(self, last_update_lookup: dict):
         to_delete = []
-        for i in self.all_page_information:
-            if i.id in last_update_lookup:  # if page is already in DB
-                if (
-                        i.last_changed > last_update_lookup[i.id]
-                ):  # if there is a change in the page
-                    self.embeddings.remove_id(i.id)  # remove from DB
-                    last_update_lookup[i.id] = None  # make the dict's entry None -> To detect remove page
+
+        for page in self.page_information:
+            if len(page.text) < 5:  # skip page if text is too short
+                to_delete.append(page)
+
+        for page in self.page_information:
+            if page.id in last_update_lookup:  # if page is already in DB
+                if page.last_changed > last_update_lookup[page.id]:  # if there is a change in the page
+                    self.embeddings.remove_id(page.id)  # remove from DB
+                    last_update_lookup[page.id] = None  # make the dict's entry None -> To detect remove page
                 elif (
-                        i.last_changed == last_update_lookup[i.id]
+                        page.last_changed == last_update_lookup[page.id]
                 ):  # if no change in the page
-                    to_delete.append(i)  # append in the list
-                    last_update_lookup[
-                        i.id
-                    ] = None  # make the dict's entry None -> To detect remove page
+                    to_delete.append(page)  # append in the list
+                    last_update_lookup[page.id] = None  # make the dict's entry None -> To detect remove page
             # if i.last_changed.year >= 2022:
             #    to_delete.append(i)
 
-        for i in to_delete:
-            self.all_page_information.remove(i)  # remove the page where no changes from the internal list
+        for page in to_delete:
+            self.page_information.remove(page)  # remove the page where no changes from the internal list
 
-        for i in last_update_lookup:
-            if (
-                    last_update_lookup[i] is not None
-            ):  # check which entry is not None -> Page is deleted from website
-                self.embeddings.remove_id(i)  # remove it from DB
+        for page in last_update_lookup:
+            if last_update_lookup[page] is not None:  # check which entry is not None -> Page is deleted from website
+                self.embeddings.remove_id(page)  # remove it from DB
 
 
 if __name__ == "__main__":

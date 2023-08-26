@@ -29,7 +29,7 @@ items=(
   "Fill DB with Confluence Data"
   "Run Slack Bot",
   "Test QA Bot"
-  "Store Confluence Documents to output.json"
+  "Store Confluence Documents to json and txt files"
   "List All Confluence Spaces")
 
 PYTHONEXEC=venv/bin/python3

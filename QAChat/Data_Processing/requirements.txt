@@ -21,3 +21,4 @@ python-dotenv
 weaviate-client
 prettytable
 spacy_langdetect
+markdownify

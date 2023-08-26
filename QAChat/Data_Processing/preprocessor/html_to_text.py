@@ -2,7 +2,12 @@ import typing
 from html import unescape
 
 import bs4
+import markdownify
 from bs4 import BeautifulSoup
+
+
+def get_text_markdonify(markup: str) -> str:
+    return markdownify.markdownify(markup)
 
 
 def get_text(markup: str) -> str:

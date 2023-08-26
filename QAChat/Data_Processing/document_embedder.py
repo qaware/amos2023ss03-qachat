@@ -13,7 +13,6 @@ import xx_ent_wiki_sm
 from spacy_langdetect import LanguageDetector
 
 from QAChat.Common.deepL_translator import DeepLTranslator
-from QAChat.VectorDB.embeddings import Embeddings
 from QAChat.VectorDB.vector_store import VectorStore
 from QAChat.VectorDB.vectordb import VectorDB
 from QAChat.VectorDB.last_modified import LastModified
@@ -24,8 +23,6 @@ from QAChat.Data_Processing.text_transformer import transform_text_to_chunks
 
 class DocumentEmbedder:
     def __init__(self):
-        self.embeddings = Embeddings()
-        self.vector_store = VectorStore()
         self.db = VectorDB()
 
         # name identification
@@ -53,13 +50,14 @@ class DocumentEmbedder:
         # all_changed_data = self.identify_names(all_changed_data)
 
         # transform long entries into multiple chunks and translation to english
-        print("Start: transform_text_to_chunks")
+        print("Transform_text_to_chunks")
         all_changed_data = transform_text_to_chunks(all_changed_data)
         print("number of chunks to update:" + str(len(all_changed_data)))
         if len(all_changed_data) == 0:
             return
 
-        self.vector_store.update_add_texts(all_changed_data, data_preprocessor.get_source())
+        vector_store = VectorStore()
+        vector_store.update_add_texts(all_changed_data, data_preprocessor.get_source())
 
         LastModified().update(data_preprocessor.get_source(), current_time)
         LastModified().show_last_entries()
