@@ -6,8 +6,10 @@ ExecStart=/home/ubuntu/miniconda3/bin/python setup_server.py
 WorkingDirectory=/root/amos2023ss03-qachat/QAChat/QA_Bot
 Restart=always
 User=root
-EnvironmentFile=/root/amos2023ss03-qachat/tokens.env
 Environment="PYTHONPATH=/root/amos2023ss03-qachat/"
-
+Environment="WEAVIATE_URL=http://weaviate:8080"
+Environment="DEEPL_TOKEN=TODO"
+Environment="TRANSLATE=true"
+Environment="VECTORIZER_DEVICE=cpu"
 [Install]
 WantedBy=multi-user.target

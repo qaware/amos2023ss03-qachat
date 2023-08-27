@@ -33,6 +33,9 @@ items=(
   "List All Confluence Spaces")
 
 PYTHONEXEC=venv/bin/python3
+if [ ! -f "$PYTHONEXEC" ]; then
+    PYTHONEXEC=python3
+fi
 
 select item in "${items[@]}"
 do
