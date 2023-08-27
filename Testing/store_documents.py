@@ -9,6 +9,7 @@ from enum import Enum
 from QAChat.Common.deepL_translator import DeepLTranslator
 
 if __name__ == "__main__":
+    translator = DeepLTranslator()
 
     for arg in sys.argv[1:]:
         if arg == "DUMMY":
@@ -44,9 +45,8 @@ if __name__ == "__main__":
 
         print("Loaded " + str(len(documents)) + " documents with " + str(nchars) + " characters.")
 
-        #translator = DeepLTranslator()
-        #for doc in documents:
-        #    doc.text = translator.translate_to(doc.text, "EN-US")
+        for doc in documents:
+            doc.text = translator.translate_to(doc.text, "EN-US").text
 
         def dumper(obj):
             if isinstance(obj, datetime):

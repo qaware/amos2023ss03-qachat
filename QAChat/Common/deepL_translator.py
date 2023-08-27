@@ -10,11 +10,26 @@ import xx_ent_wiki_sm
 from spacy import Language
 from spacy_langdetect import LanguageDetector
 
+def strtobool (val):
+    """Convert a string representation of truth to true (1) or false (0).
+    True values are 'y', 'yes', 't', 'true', 'on', and '1'; false values
+    are 'n', 'no', 'f', 'false', 'off', and '0'.  Raises ValueError if
+    'val' is anything else.
+    """
+    val = val.lower()
+    if val in ('y', 'yes', 't', 'true', 'on', '1'):
+        return 1
+    elif val in ('n', 'no', 'f', 'false', 'off', '0'):
+        return 0
+    else:
+        raise ValueError("invalid truth value %r" % (val,))
+
+
 DEEPL_TOKEN = os.getenv("DEEPL_TOKEN")
 if DEEPL_TOKEN is None:
     raise Exception("DEEPL_TOKEN not set")
 
-TRANSLATE = os.getenv("TRANSLATE")
+TRANSLATE = strtobool(os.getenv("TRANSLATE"))
 if TRANSLATE is None:
     raise Exception("TRANSLATE not set")
 
@@ -27,6 +42,11 @@ class Result:
 
 class DeepLTranslator:
     def __init__(self):
+        if TRANSLATE:
+            print("Translation enabled")
+        else:
+            print("Translation disabled")
+
         if not TRANSLATE:
             return
         # initialize a DeepL translator service
