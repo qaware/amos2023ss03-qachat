@@ -11,7 +11,7 @@
 ### 1. Clone the repository
 
 ```` bash
-git clone https://github.com/amosproj/amos2023ss03-qachat
+git clone https://github.com/qaware/amos2023ss03-qachat
 ````
 
 ### 2. Set Python Path:

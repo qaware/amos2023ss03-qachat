@@ -2,13 +2,13 @@
 # SPDX-FileCopyrightText: 2023 Felix Nützel
 import sys
 
+from QAChat.VectorDB.Documents.document_store import DocumentStore
 from QAChat.VectorDB.embeddings import Embeddings
 from QAChat.VectorDB.last_modified import LastModified
 from QAChat.VectorDB.loaded_channels import LoadedChannels
 from QAChat.VectorDB.vectordb import VectorDB
 
 db = VectorDB()
-
 
 def print_index_content(index_name=None, condition=None, limit=1000):
     if index_name is None:
@@ -28,15 +28,15 @@ def print_content_length(index_name=None):
     else:
         print(f"Total length of {index_name}: {db.get_size(index_name)}")
 
-
 if __name__ == "__main__":
     arg = sys.argv[1]
-
     if arg == "INFO":
         print_index_content(*sys.argv[2:])
         print_content_length(*sys.argv[2:])
     elif arg == "CLEAR":
         db.clear_db()
+    elif arg == "INIT":
+        DocumentStore().init_class()
         LastModified().init_class()
         Embeddings().init_class()
         LoadedChannels().init_class()

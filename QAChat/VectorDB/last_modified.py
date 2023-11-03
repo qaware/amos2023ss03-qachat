@@ -1,8 +1,8 @@
 from datetime import datetime
+from pprint import pprint
 
+from QAChat.VectorDB.Documents.document_data import DocumentDataSource
 from QAChat.VectorDB.vectordb import VectorDB
-from QAChat.Data_Processing.preprocessor.data_information import DataSource
-
 
 class LastModified:
 
@@ -26,7 +26,7 @@ class LastModified:
             )
 
 
-    def get_last_update(self, source: DataSource) -> datetime:
+    def get_last_update(self, source: DocumentDataSource) -> datetime:
         where_filter_last_update = {
             "path": ["type"],
             "operator": "Equal",
@@ -46,16 +46,15 @@ class LastModified:
             )
         return last_updated
 
-    def update(self, source: DataSource, current_time: datetime):
+    def update(self, source: DocumentDataSource, current_time: datetime):
         self.db.weaviate_client.data_object.create(
             {"type": source.value, "last_update": current_time.isoformat()},
             "LastModified",
         )
 
     def show_last_entries(self):
-        print(
+        pprint(
             self.db.weaviate_client.query.get("LastModified", ["last_update", "type"])
-            .do()
-            .items()
+            .do()["data"]["Get"]["LastModified"]
         )
 

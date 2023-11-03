@@ -15,7 +15,7 @@ if __name__ == "__main__":
         if arg == "DUMMY":
             # if yes, only store dummy data
             print("Storing dummy data")
-            from QAChat.Data_Processing.preprocessor.dummy_preprocessor import DummyPreprocessor
+            from QAChat.Fetcher.Dummy.dummy_fetcher import DummyPreprocessor
 
             data_preprocessor = DummyPreprocessor()
         elif arg == "CONFLUENCE":
