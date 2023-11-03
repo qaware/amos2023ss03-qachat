@@ -27,7 +27,7 @@ services:
       - ./DummyData:/DummyData
       - ./QAChat/Common:/QAChat/Common
       - ./QAChat/Data_Processing:/QAChat/Data_Processing
-    entrypoint: ["python", "/QAChat/Data_Processing/main.py", "CLEAR", "DUMMY"]
+    entrypoint: ["python", "/QAChat/Data_Processing/main.py", "DUMMY"]
     networks:
       - qachat
 

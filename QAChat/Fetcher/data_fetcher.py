@@ -6,11 +6,10 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import List
 
-from QAChat.Data_Processing.preprocessor.data_information import DataInformation
-from QAChat.VectorDB.Documents.document_data import DocumentDataSource
+from QAChat.VectorDB.Documents.document_data import DocumentData, DocumentDataSource
 
 
-class DataPreprocessor(ABC):
+class DataFetcher(ABC):
 
     @abstractmethod
     def get_source(self) -> DocumentDataSource:
@@ -28,7 +27,7 @@ class DataPreprocessor(ABC):
     @abstractmethod
     def load_preprocessed_data(
         self, end_of_timeframe: datetime, start_of_timeframe: datetime
-    ) -> List[DataInformation]:
+    ) -> List[DocumentData]:
         """
         Loads preprocessed data of a specific type that was created or modified
         within a certain timeframe.

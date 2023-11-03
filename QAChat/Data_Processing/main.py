@@ -4,17 +4,10 @@
 import sys
 
 from document_embedder import DocumentEmbedder
-from QAChat.VectorDB.vectordb import VectorDB
 
 if __name__ == "__main__":
     for arg in sys.argv[1:]:
-        if arg == "DUMMY":
-            # if yes, only store dummy data
-            print("Storing dummy data")
-            from QAChat.Data_Processing.preprocessor.dummy_preprocessor import DummyPreprocessor
-            data_preprocessor = DummyPreprocessor()
-            DocumentEmbedder().store_information_in_database(data_preprocessor)
-        elif arg == "CONFLUENCE":
+        if arg == "CONFLUENCE":
             print("Storing confluence data")
             from QAChat.Data_Processing.preprocessor.confluence_preprocessor import ConfluencePreprocessor
             data_preprocessor = ConfluencePreprocessor()

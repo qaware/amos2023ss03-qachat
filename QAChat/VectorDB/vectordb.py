@@ -14,7 +14,7 @@ class VectorDB:
             raise Exception("WEAVIATE_URL is not set")
         self.weaviate_client: weaviate.Client = weaviate.Client(url=WEAVIATE_URL)
 
-    def get_all_classes(self):
+    def get_all_classes(self) -> list[str]:
         """
         A function to get all tables in the database.
         """

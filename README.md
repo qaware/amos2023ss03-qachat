@@ -5,9 +5,11 @@
 </p>
 
 ## Wiki
-Everything is documented in our [Wiki](https://github.com/amosproj/amos2023ss03-qachat/wiki). There you can find everything from regarding Setup, Research, Architecture and lots more.
+Everything is documented in our [Wiki](https://github.com/qaware/amos2023ss03-qachat/wiki). There you can find everything from regarding Setup, Research, Architecture and lots more.
 
-## Team
+## Original Team
+The original software was developed as an [AMOS project](https://oss.cs.fau.de/teaching/the-amos-project/) 
+
 Scrum Master: [@vukica1](https://github.com/vukica1)
 
 Product Owner: [@SaraElBrak](https://github.com/SaraElBrak), [@tkonheiser](https://github.com/tkonheiser)
@@ -19,9 +21,6 @@ Developer: [@Felix-012](https://github.com/Felix-012), [@emuguy1](https://github
 
 ## Vision
 *QAchat* envisions an environment in which access to knowledge is just a message away. We aim to leverage the rapid advancement in language model technologies to create a seamless interface that enables employees to get their questions answered accurately, quickly, efficiently, and with ease - by a general language model that is trained on specific knowledge. Our goal is to provide a simple and convenient point of contact, with an easy-to-use interface that is integrated into widely used communication tools, and to make knowledge accessible to everyone - irrespective of their geographical location, language or technical ability.
-
-## Documentation
-- For the Team Google Sheet go to: [Google Sheet](https://docs.google.com/spreadsheets/d/1YPjbiAhNvHcSZrW76hD67fqGCg3-shARfk5d4C8jOtA)
 
 ## Local Development
 

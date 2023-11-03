@@ -1,23 +1,17 @@
-# SPDX-License-Identifier: MIT
-# SPDX-FileCopyrightText: 2023 Hafidz Arifin
-# SPDX-FileCopyrightText: 2023 Abdelkader Alkadour
-
 import io
 import os
 import re
 from datetime import datetime
-from typing import List, Dict
+from typing import List
 
 import requests
 from atlassian import Confluence
-
+from QAChat.Fetcher.data_fetcher import DataFetcher
 from QAChat.Fetcher.Confluence.filter_manager import FilterManager
-from QAChat.VectorDB.embeddings import Embeddings
 from QAChat.Fetcher.PDF.pdf_reader import PDFReader
-from QAChat.Data_Processing.preprocessor.data_information import DataInformation, DocumentDataSource
-from QAChat.Data_Processing.preprocessor.data_preprocessor import DataPreprocessor
-from QAChat.Data_Processing.preprocessor.google_doc_preprocessor import GoogleDocPreProcessor
-from QAChat.Data_Processing.preprocessor.html_to_text import get_text_markdonify
+from QAChat.VectorDB.Documents.document_data import DocumentData, DocumentDataSource, DocumentDataFormat
+
+# TODO: How do removed documents look like?
 
 # Get Confluence API credentials from environment variables
 CONFLUENCE_ADDRESS = os.getenv("CONFLUENCE_ADDRESS")
@@ -32,19 +26,16 @@ CONFLUENCE_TOKEN = os.getenv("CONFLUENCE_TOKEN")
 if CONFLUENCE_TOKEN is None:
     raise ValueError("Please set CONFLUENCE_TOKEN environment variable")
 
-
-class ConfluencePreprocessor(DataPreprocessor):
+class ConfluenceFetcher(DataFetcher):
     def __init__(self):
-        self.embeddings = Embeddings()
         self.confluence = Confluence(
             url=CONFLUENCE_ADDRESS,
             username=CONFLUENCE_USERNAME,
             password=CONFLUENCE_TOKEN,
         )
         self.pdf_reader = PDFReader()
+        self.page_information : List[DocumentData] = []
         self.filter_manager = FilterManager()
-        self.g_docs_proc = GoogleDocPreProcessor()
-        self.page_information : List[DataInformation] = []
 
     def get_source(self) -> DocumentDataSource:
         return DocumentDataSource.CONFLUENCE
@@ -100,7 +91,7 @@ class ConfluencePreprocessor(DataPreprocessor):
 
         return page_ids
 
-    def get_data_from_page(self, page_id) -> DataInformation:
+    def get_data_from_page(self, page_id) -> DocumentData:
         # Get page by id
         page_with_body = self.confluence.get_page_by_id(
             page_id,
@@ -140,16 +131,15 @@ class ConfluencePreprocessor(DataPreprocessor):
         # + " " + pdf_content,
 
         # print(f"Länge {page_id}: %d \n" % len(text))
-        # Add Page content to list of DataInformation
+        # Add Page content to list of DocumentData
         # print(page_info["_links"]["base"] + page_info["_links"]["webui"].split("overview")[0])
-        return DataInformation(
-                id=page_id,
-                chunk=0,
+        return DocumentData(
+                uniq_id=page_id,
+                _format=DocumentDataFormat.CONFLUENCE,
                 last_changed=last_changed,
-                typ=DocumentDataSource.CONFLUENCE,
-                text=text,
+                data_source=DocumentDataSource.CONFLUENCE,
+                content=text,
                 title=page_info["title"],
-                space=page_info["space"]["key"],
                 link=page_info["_links"]["base"] + page_info["_links"]["webui"].split("overview")[0],
             )
 
@@ -170,25 +160,26 @@ class ConfluencePreprocessor(DataPreprocessor):
     def get_raw_text_from_page(self, page_with_body) -> str:
         # Get page content
         page_in_html = page_with_body["body"]["storage"]["value"]
+        return page_in_html
         # return page_in_html
         #return get_text(page_in_html)
-        return get_text_markdonify(page_in_html)
+        #return get_text_markdonify(page_in_html)
 
-    def get_content_from_google_drive(self, urls):
-        pdf_content = ""
+#    def get_content_from_google_drive(self, urls):
+#        pdf_content = ""
+#
+#        # go through all urls
+#        for url in urls:
+#            # get id from url
+#            google_drive_id = url.split("/d/")[1].split("/")[0]
+#
+#            # get pdf by id
+#            pdf_bytes = self.g_docs_proc.export_pdf(google_drive_id)
+#
+#            # get content from pdf
+#            pdf_content += self.pdf_reader.read_pdf(pdf_bytes) + " "
 
-        # go through all urls
-        for url in urls:
-            # get id from url
-            google_drive_id = url.split("/d/")[1].split("/")[0]
-
-            # get pdf by id
-            pdf_bytes = self.g_docs_proc.export_pdf(google_drive_id)
-
-            # get content from pdf
-            pdf_content += self.pdf_reader.read_pdf(pdf_bytes) + " "
-
-        return pdf_content
+#        return pdf_content
 
     def get_content_from_page_attachments(self, page_id) -> str:
         start = 0
@@ -231,17 +222,17 @@ class ConfluencePreprocessor(DataPreprocessor):
                             try:
                                 pdf_content += self.pdf_reader.read_pdf(pdf_bytes) + " "
                                 print(
-                                    f"Content: {pdf_content}, Page id: {page_id}, Attachment: {attachment['title']}, Link: {download_link}, Space: {self.page_information[-1].space}")
+                                    f"Content: {pdf_content}, Page id: {page_id}, Attachment: {attachment['title']}, Link: {download_link}")
                             except Exception as e:
                                 print(f"Error while reading pdf: {e}")
                                 print(
-                                    f"Page id: {page_id}, Attachment: {attachment['title']}, Link: {download_link}, Space: {self.page_information[-1].space}")
+                                    f"Page id: {page_id}, Attachment: {attachment['title']}, Link: {download_link}")
                                 continue
         return pdf_content
 
     def load_preprocessed_data(
-            self, end_of_timeframe: datetime, start_of_timeframe: datetime, do_remove: bool = True
-    ) -> List[DataInformation]:
+            self, end_of_timeframe: datetime, start_of_timeframe: datetime
+    ) -> List[DocumentData]:
 
         all_spaces: List[str] = self.get_all_spaces()
         for space in all_spaces:
@@ -251,52 +242,23 @@ class ConfluencePreprocessor(DataPreprocessor):
                 page = self.get_data_from_page(page_id)
                 self.page_information.append(page)
 
-        if do_remove:
-            last_update_lookup: Dict[str, datetime] = self.load_embedded_data()
-            self.filter_pages(last_update_lookup)
-
         return [data for data in self.page_information]
 
-    def load_embedded_data(self) -> Dict[str, datetime]:
-        # get the metadata of type Confluence from DB
-        data = self.embeddings.get_all_for_documenttype("confluence")
-        print("loaded " + str(len(data)) + " embeddings from DB for document type 'confluence'")
+if __name__ == "__main__":
+    cf = ConfluenceFetcher()
 
-        last_update_lookup = dict()
+    date_string = "2070-01-01"
+    format_string = "%Y-%m-%d"
 
-        for d in data:
-            # add each ID in dict last_update_lookup
-            if d.page_id not in last_update_lookup:
-                last_update_lookup[d.page_id] = datetime.strptime(
-                    d.last_update.split("T")[0], "%Y-%m-%d"
-                )
-
-        return last_update_lookup
-
-    def filter_pages(self, last_update_lookup: dict):
-        to_delete = []
-
-        for page in self.page_information:
-            if len(page.text) < 5:  # skip page if text is too short
-                to_delete.append(page)
-
-        for page in self.page_information:
-            if page.id in last_update_lookup:  # if page is already in DB
-                if page.last_changed > last_update_lookup[page.id]:  # if there is a change in the page
-                    self.embeddings.remove_id(page.id)  # remove from DB
-                    last_update_lookup[page.id] = None  # make the dict's entry None -> To detect remove page
-                elif (
-                        page.last_changed == last_update_lookup[page.id]
-                ):  # if no change in the page
-                    to_delete.append(page)  # append in the list
-                    last_update_lookup[page.id] = None  # make the dict's entry None -> To detect remove page
-            # if i.last_changed.year >= 2022:
-            #    to_delete.append(i)
-
-        for page in to_delete:
-            self.page_information.remove(page)  # remove the page where no changes from the internal list
-
-        for page in last_update_lookup:
-            if last_update_lookup[page] is not None:  # check which entry is not None -> Page is deleted from website
-                self.embeddings.remove_id(page)  # remove it from DB
-
+    z = cf.load_preprocessed_data(
+        datetime.now(),
+        datetime.strptime(date_string, format_string),
+    )
+    for i in z:
+        print(i.uniq_id)
+        print(i.format)
+        print(i.title)
+        print(i.text)
+        print(len(i.text))
+        print(i.last_changed)
+        print("----" * 5)
