@@ -111,7 +111,7 @@ class QABot:
 
     def translate_text(self, question, language="EN-US") -> Result:
         return self.translator.translate_to(
-            question, language, use_spacy_to_detect_lang_if_needed=False
+            question, language, detect_lang=False
         )
 
     def answer_question(self, question: str, handler: StreamLLMCallbackHandler | None):

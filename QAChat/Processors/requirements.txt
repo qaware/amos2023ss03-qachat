@@ -12,13 +12,10 @@ requests
 slack-sdk
 bs4
 atlassian-python-api
-spacy
-spacy_langdetect
 pydrive2
 google-api-python-client
 google-auth
 google-auth-oauthlib
 python-dotenv
-weaviate-client
 prettytable
 markdownify
