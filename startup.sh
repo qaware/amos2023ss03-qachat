@@ -27,18 +27,27 @@ PS3="Select item please: "
 function DBFunctions {
     items=(
         "Show DB Info",
+        "Clear Init DB (Dangerous)"
         "Show Last Modified",
         "Show Embeddings",
-        "Clear Init DB"
+        "Show Documents",
     )
 
     select item in "${items[@]}"
     do
         case $REPLY in
             1) ${PYTHONEXEC} QAChat/VectorDB/db_cli.py INFO; break;;
-            2) ${PYTHONEXEC} QAChat/VectorDB/db_cli.py INFO LastModified; break;;
-            3) ${PYTHONEXEC} QAChat/VectorDB/db_cli.py INFO Embeddings; break;;
-            4) ${PYTHONEXEC} QAChat/VectorDB/db_cli.py CLEAR; ${PYTHONEXEC} QAChat/VectorDB/db_cli.py INIT; break;;
+            2)
+                read -p "Are you sure? " -n 1 -r
+                echo    # (optional) move to a new line
+                if [[ ! $REPLY =~ ^[Yy]$ ]]
+                then
+                    [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1 # handle exits from shell or function but don't exit interactive shell
+                fi
+                ${PYTHONEXEC} QAChat/VectorDB/db_cli.py CLEAR; ${PYTHONEXEC} QAChat/VectorDB/db_cli.py INIT; break;;
+            3) ${PYTHONEXEC} QAChat/VectorDB/db_cli.py INFO LastModified; break;;
+            4) ${PYTHONEXEC} QAChat/VectorDB/db_cli.py INFO Embeddings; break;;
+            5) ${PYTHONEXEC} QAChat/VectorDB/db_cli.py INFO Documents; break;;
             *) echo "Ooops - unknown choice $REPLY"; break;
         esac
     done
@@ -55,9 +64,9 @@ function TestFunctions {
     select item in "${items[@]}"
     do
         case $REPLY in
-            1) ${PYTHONEXEC} Testing/list_all_spaces.py; break;;
+            1) ${PYTHONEXEC} Testing/list_all_confluence_spaces.py; break;;
             2) mkdir -p statistics && ${PYTHONEXEC} Testing/confluence_statistic.py; break;;
-            3) ${PYTHONEXEC} QAChat/Fetcher/confluence_fetcher.py; break;;
+            3) ${PYTHONEXEC} QAChat/Fetcher/Confluence/confluence_fetcher.py; break;;
             4) ${PYTHONEXEC} Testing/store_documents.py CONFLUENCE; break;;
             *) echo "Ooops - unknown choice $REPLY"; break;
         esac

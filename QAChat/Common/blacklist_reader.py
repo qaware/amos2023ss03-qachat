@@ -8,7 +8,7 @@ class Blacklist:
 
 
 def read_blacklist_items(filename: str) -> List[Blacklist]:
-    if os.getcwd().split("/")[-1] == "Common" or os.getcwd().split("/")[-1] == "Data_Processing":
+    if os.getcwd().split("/")[-1] == "Common" or os.getcwd().split("/")[-1] == "Processors":
         path = f"../../{filename}"
     else:
         path = f"{filename}"

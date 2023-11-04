@@ -16,9 +16,9 @@ from QAChat.Common.deepL_translator import DeepLTranslator
 from QAChat.VectorDB.vector_store import VectorStore
 from QAChat.VectorDB.vectordb import VectorDB
 from QAChat.VectorDB.last_modified import LastModified
-from QAChat.Data_Processing.preprocessor.data_information import DataInformation
-from QAChat.Data_Processing.preprocessor.data_preprocessor import DataPreprocessor
-from QAChat.Data_Processing.text_transformer import transform_text_to_chunks
+from QAChat.Processors.preprocessor.data_information import DataInformation
+from QAChat.Processors.preprocessor.data_preprocessor import DataPreprocessor
+from QAChat.Processors.text_transformer import transform_text_to_chunks
 
 
 class DocumentEmbedder:
@@ -32,6 +32,7 @@ class DocumentEmbedder:
         spacy.cli.download("de_core_news_sm")
         spacy.load("de_core_news_sm")
         self.de_lang_nlp = de_core_news_sm.load()
+
         self.translator = DeepLTranslator()
 
     def store_information_in_database(self, data_preprocessor: DataPreprocessor):

@@ -9,9 +9,9 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 
-from QAChat.Data_Processing.preprocessor.data_preprocessor import DataPreprocessor
-from QAChat.Data_Processing.preprocessor.data_information import DataSource
-from QAChat.Data_Processing.pdf_reader import PDFReader
+from QAChat.Processors.preprocessor.data_preprocessor import DataPreprocessor
+from QAChat.Processors.preprocessor.data_information import DataSource
+from QAChat.Processors.pdf_reader import PDFReader
 from google.oauth2 import service_account
 import os
 

@@ -275,9 +275,9 @@ fabric.properties
 QAChat/Common/blacklist.txt
 tokens.env
 unusedTokens.env
-QAChat/Data_Processing/client_secrets.json
-QAChat/Data_Processing/credentials.json
-QAChat/Data_Processing/credentials_file.json
+QAChat/Processors/client_secrets.json
+QAChat/Processors/credentials.json
+QAChat/Processors/credentials_file.json
 
 *client_secret_*.apps.googleusercontent.com.json
 *client_secrets.json
@@ -293,3 +293,4 @@ notes.txt
 data/
 
 blacklist.txt
+login.sh
