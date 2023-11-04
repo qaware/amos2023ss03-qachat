@@ -2,28 +2,26 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 
-from QAChat.Data_Processing.preprocessor.confluence_preprocessor import ConfluencePreprocessor
+from QAChat.Fetcher.Confluence.confluence_fetcher import ConfluenceFetcher
 
 
 class Statistic:
     def __init__(self):
-        processor = ConfluencePreprocessor()
+        cf = ConfluenceFetcher()
 
-        self.documents = processor.load_preprocessed_data(
+        self.documents = cf.load_preprocessed_data(
             datetime.now(),
-            datetime(1970, 1, 1),
-            do_remove=False
+            datetime(1970, 1, 1)
         )
         print("Loaded " + str(len(self.documents)) + " documents.")
         for doc in self.documents:
-            print(doc.id, doc.title)
+            print(doc.uniq_id, doc.title)
 
-        self.spaces = processor.get_all_spaces()
+        self.spaces = cf.get_all_spaces()
         self.statistic = []
         self.costs_per_char = 20 / 1_000_000 # 20 € per 1 million characters for DeepL API
 
     def create_statistic(self):
-
         for space in self.spaces:
             pages = []
             for data in self.documents:
@@ -205,7 +203,7 @@ class Statistic:
 
 if __name__ == "__main__":
     statistic = Statistic()
-    statistic.create_statistic()
-    statistic.print()
-    statistic.create_bar_chart_for_spaces()
-    statistic.create_bar_chart_for_all_spaces()
+    #statistic.create_statistic()
+    #statistic.print()
+    #statistic.create_bar_chart_for_spaces()
+    #statistic.create_bar_chart_for_all_spaces()

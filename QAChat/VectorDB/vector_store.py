@@ -4,8 +4,8 @@ from typing import Any, List, Dict, Union
 from langchain.embeddings import HuggingFaceInstructEmbeddings
 from langchain.vectorstores import Weaviate
 
+from QAChat.Processors.preprocessor.data_information import DataInformation
 from QAChat.VectorDB.vectordb import VectorDB
-
 
 class VectorStore:
     def __init__(self, embeddings_gpu=True):
@@ -26,7 +26,7 @@ class VectorStore:
             text_key="text",
         )
 
-    def update_add_texts(self, all_changed_data, typ):
+    def update_add_texts(self, all_changed_data : list[DataInformation]):
         print("delete texts")
 
         ids: set[str] = set()
@@ -50,7 +50,7 @@ class VectorStore:
                 {
                     "type_id": data.id,
                     "chunk": data.chunk,
-                    "type": typ.value,
+                    "type": data.typ.value,
                     "last_changed": data.last_changed.isoformat(),
                     "text": data.text,
                     "link": data.link,

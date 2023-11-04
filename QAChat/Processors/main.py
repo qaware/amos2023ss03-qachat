@@ -3,22 +3,15 @@
 # SPDX-FileCopyrightText: 2023 Amela Pucic
 import sys
 
+from QAChat.VectorDB.Documents.document_store import DocumentStore
 from document_embedder import DocumentEmbedder
 
 if __name__ == "__main__":
-    for arg in sys.argv[1:]:
-        if arg == "CONFLUENCE":
-            print("Storing confluence data")
-            from QAChat.Processors.preprocessor.confluence_preprocessor import ConfluencePreprocessor
-            data_preprocessor = ConfluencePreprocessor()
-            DocumentEmbedder().store_information_in_database(data_preprocessor)
-            # DocumentEmbedder().store_information_in_database(DataSource.SLACK) # TODO: uncomment later
-        elif arg == "SLACK":
-            print("Storing slack data")
-            from QAChat.Fetcher.Slack.slack_preprocessor import SlackPreprocessor
-            data_preprocessor = SlackPreprocessor()
-            DocumentEmbedder().store_information_in_database(data_preprocessor)
-            # DocumentEmbedder().store_information_in_database(DataSource.SLACK) # TODO: uncomment later
-        else:
-            print("Sorry, wrong argument.")
-            sys.exit(1)
+    document_store = DocumentStore()
+    print("Get all documents")
+    documents = document_store.get_all_documents()
+    print("Received", len(documents), "documents")
+    DocumentEmbedder().store_information_in_database(documents)
+
+
+

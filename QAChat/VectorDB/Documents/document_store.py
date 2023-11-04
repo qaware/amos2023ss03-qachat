@@ -1,4 +1,4 @@
-from QAChat.VectorDB.Documents.document_data import DocumentData
+from QAChat.VectorDB.Documents.document_data import DocumentData, DocumentDataFormat, DocumentDataSource
 from QAChat.VectorDB.vectordb import VectorDB
 
 class DocumentStore:
@@ -85,3 +85,30 @@ class DocumentStore:
                 "valueString": uniq_id,
             },
         )
+
+    def get_all_documents(self)-> list[DocumentData]:
+        documents: list[DocumentData] = []
+
+        document_uuid = None
+        while True:
+            data = (
+                self.db.weaviate_client.data_object.get(class_name="Documents", after=document_uuid, limit=1000)['objects']
+            )
+            print("Paging: Got", len(data), "documents")
+            for d in data:
+                prop = d['properties']
+                uniq_id = prop["uniq_id"]
+                _format = DocumentDataFormat(prop["format"])
+                data_source = DocumentDataSource(prop["data_source"])
+                content = prop["content"]
+                title = prop["title"]
+                last_changed = prop["last_changed"]
+                link = prop["link"]
+                documents.append(DocumentData(uniq_id, _format, last_changed, data_source, content, title, link))
+
+            if len(data) == 0:
+                break
+            document_uuid = data[-1]['id']
+
+        return documents
+        

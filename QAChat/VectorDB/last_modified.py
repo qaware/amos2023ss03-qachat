@@ -5,7 +5,6 @@ from QAChat.VectorDB.Documents.document_data import DocumentDataSource
 from QAChat.VectorDB.vectordb import VectorDB
 
 class LastModified:
-
     def __init__(self):
         self.db = VectorDB()
 
