@@ -9,44 +9,36 @@ from enum import Enum
 from QAChat.Common.deepL_translator import DeepLTranslator
 
 if __name__ == "__main__":
-    translator = DeepLTranslator()
-
     for arg in sys.argv[1:]:
         if arg == "DUMMY":
-            # if yes, only store dummy data
             print("Storing dummy data")
-            from QAChat.Fetcher.Dummy.dummy_fetcher import DummyPreprocessor
-
-            data_preprocessor = DummyPreprocessor()
+            from QAChat.Fetcher.Dummy.dummy_fetcher import DummyFetcher
+            data_fetcher = DummyFetcher()
         elif arg == "CONFLUENCE":
             print("Storing confluence data")
-            from QAChat.Data_Processing.preprocessor.confluence_preprocessor import ConfluencePreprocessor
-
-            data_preprocessor = ConfluencePreprocessor()
-            # DocumentEmbedder().store_information_in_database(DataSource.SLACK) # TODO: uncomment later
+            from QAChat.Fetcher.Confluence.confluence_fetcher import ConfluenceFetcher
+            data_fetcher = ConfluenceFetcher()
         elif arg == "SLACK":
             print("Storing slack data")
-            from QAChat.Data_Processing.preprocessor.slack_preprocessor import SlackPreprocessor
-
-            data_preprocessor = SlackPreprocessor()
-            # DocumentEmbedder().store_information_in_database(DataSource.SLACK) # TODO: uncomment later
+            #from QAChat.Data_Processing.preprocessor.slack_preprocessor import SlackPreprocessor
+            #data_preprocessor = SlackPreprocessor()
         else:
             print("Sorry, wrong argument.")
             sys.exit(1)
 
-        documents = data_preprocessor.load_preprocessed_data(
+        documents = data_fetcher.load_preprocessed_data(
             datetime.now(),
-            datetime(1970, 1, 1),
-            do_remove=False)
+            datetime(1970, 1, 1))
 
         nchars = 0
         for doc in documents:
-            nchars += len(doc.text)
+            nchars += len(doc.content)
 
         print("Loaded " + str(len(documents)) + " documents with " + str(nchars) + " characters.")
 
-        for doc in documents:
-            doc.text = translator.translate_to(doc.text, "EN-US").text
+        translator = DeepLTranslator()
+        #for doc in documents:
+        #    doc.text = translator.translate_to(doc.text, "EN-US").text
 
         def dumper(obj):
             if isinstance(obj, datetime):
@@ -68,12 +60,12 @@ if __name__ == "__main__":
         with open("documents.txt", "w") as text_file:
             for doc in documents:
                 text_file.write("title: " + doc.title + "\n")
-                text_file.write("id: " + doc.id + "\n")
+                text_file.write("format: " + doc.format.value + "\n")
+                text_file.write("uniq_id: " + doc.uniq_id + "\n")
                 text_file.write("last changed: " + doc.last_changed.isoformat() + "\n")
-                text_file.write("typ: " + doc.typ.value + "\n")
+                text_file.write("typ: " + doc.data_source.value + "\n")
                 text_file.write("link: " + doc.link + "\n")
-                text_file.write("space: " + doc.space + "\n")
-                text_file.write("text:\n" +doc.text + "\n")
+                text_file.write("text:\n" +doc.content + "\n")
                 text_file.write("\n\n------------------------------------------------------\n\n")
 
         print("Stored documents in documents.txt")

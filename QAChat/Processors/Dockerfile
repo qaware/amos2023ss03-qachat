@@ -1,7 +1,7 @@
 FROM python:3.10
 
-#RUN mkdir -p QAChat/Data_Processing
-#WORKDIR /QAChat/Data_Processing
+#RUN mkdir -p QAChat/Processors
+#WORKDIR /QAChat/Processors
 
 #pip install --upgrade pip
 
@@ -18,5 +18,5 @@ RUN rm -f setup.py
 
 ENV PYTHONPATH=$PYTHONPATH:/
 
-ENTRYPOINT ["python", "/QAChat/Data_Processing/main.py"]
+ENTRYPOINT ["python", "/QAChat/Processors/main.py"]
 

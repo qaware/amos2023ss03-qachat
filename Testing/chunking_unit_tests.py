@@ -5,11 +5,12 @@ import math
 import unittest
 import pandas as pd
 
-from QAChat.Data_Processing.document_embedder import DataInformation, DataSource
 from QAChat.Data_Processing.text_transformer import transform_text_to_chunks
 from QAChat.Data_Processing.text_transformer import CHUNK_SIZE
 from datetime import datetime
 from typing import List
+
+from QAChat.VectorDB.Documents.document_data import DocumentData, DocumentDataSource, DocumentDataFormat
 
 
 class TestChunking(unittest.TestCase):
@@ -20,17 +21,17 @@ class TestChunking(unittest.TestCase):
     @staticmethod
     def __load_preprocessed_data(
         before: datetime, after: datetime, filepath: str
-    ) -> List[DataInformation]:
+    ) -> List[DocumentData]:
         df = pd.read_csv(filepath, sep=";")
         raw_data = []
         for index, row in df.iterrows():
             raw_data.append(
-                DataInformation(
-                    id=f"{index}",
-                    chunk=0,
+                DocumentData(
+                    uniq_id=f"{index}",
+                    _format=DocumentDataFormat.TEXT,
                     last_changed=datetime(2021, 1, 1),
-                    typ=DataSource.DUMMY,
-                    text=row["Answer"] + row["Question"],
+                    data_source=DocumentDataSource.DUMMY,
+                    content=row["Answer"] + row["Question"],
                 )
             )
 

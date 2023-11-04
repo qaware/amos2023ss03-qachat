@@ -9,7 +9,7 @@ import nltk
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 from QAChat.Common.deepL_translator import DeepLTranslator
-from QAChat.Data_Processing.preprocessor.data_information import DataInformation
+from QAChat.Processors.preprocessor.data_information import DataInformation
 
 CHUNK_SIZE = 200
 CHUNK_OVERLAP = 50

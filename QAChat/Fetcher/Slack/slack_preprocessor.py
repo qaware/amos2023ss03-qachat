@@ -10,8 +10,8 @@ from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
 from QAChat.VectorDB.vectordb import VectorDB
-from QAChat.Data_Processing.preprocessor.data_preprocessor import DataPreprocessor
-from QAChat.Data_Processing.preprocessor.data_information import DataInformation, DataSource
+from QAChat.Processors.preprocessor.data_preprocessor import DataPreprocessor
+from QAChat.Processors.preprocessor.data_information import DataInformation, DataSource
 
 SLACK_TOKEN = os.getenv("SLACK_TOKEN")
 if SLACK_TOKEN is None:
