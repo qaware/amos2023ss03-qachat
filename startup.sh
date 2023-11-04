@@ -59,6 +59,8 @@ function TestFunctions {
         "Confluence statistics"
         "Fetch Confluence Documents and write to stdout"
         "Store Confluence Documents to json and txt files"
+        "Language Detection Test"
+        "DeepL Translation Test"
     )
 
     select item in "${items[@]}"
@@ -68,6 +70,8 @@ function TestFunctions {
             2) mkdir -p statistics && ${PYTHONEXEC} Testing/confluence_statistic.py; break;;
             3) ${PYTHONEXEC} QAChat/Fetcher/Confluence/confluence_fetcher.py; break;;
             4) ${PYTHONEXEC} Testing/store_documents.py CONFLUENCE; break;;
+            5) ${PYTHONEXEC} QAChat/Common/langdetector.py; break;;
+            6) ${PYTHONEXEC} QAChat/Common/deepL_translator.py; break;;
             *) echo "Ooops - unknown choice $REPLY"; break;
         esac
     done

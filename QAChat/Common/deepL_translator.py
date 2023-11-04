@@ -4,11 +4,9 @@
 # SPDX-FileCopyrightText: 2023 Jesse Palarus
 
 import os
-
 import deepl
-import xx_ent_wiki_sm
-from spacy import Language
-from spacy_langdetect import LanguageDetector
+from QAChat.Common.langdetector import LangDetector
+
 
 def strtobool (val):
     """Convert a string representation of truth to true (1) or false (0).
@@ -51,25 +49,17 @@ class DeepLTranslator:
             return
         # initialize a DeepL translator service
         self.translator = deepl.Translator(DEEPL_TOKEN)
-        self.multi_lang_nlp = xx_ent_wiki_sm.load()
-        Language.factory("language_detector", func=self.get_lang_detector)
-        if "sentencizer" not in self.multi_lang_nlp.pipe_names:
-            self.multi_lang_nlp.add_pipe("sentencizer")
-        if "language_detector" not in self.multi_lang_nlp.pipe_names:
-            self.multi_lang_nlp.add_pipe("language_detector", last=True)
+        self.langdetect = LangDetector()
 
-    def translate_to(self, text, target_lang, use_spacy_to_detect_lang_if_needed=True) -> Result:
+
+    def translate_to(self, text, target_lang, detect_lang=True) -> Result:
         if not TRANSLATE:
-            return Result(text, "EN_US")
+            return Result(text, "EN-US")
 
-        if use_spacy_to_detect_lang_if_needed:
-            doc = self.multi_lang_nlp(text)
-            if (
-                    doc._.language["language"] == "en"
-                    and doc._.language["score"] > 0.8
-                    and target_lang == "EN-US"
-            ):
-                return Result(text, "EN_US")
+        if detect_lang:
+            lang = self.langdetect.get_language(text)
+            if lang == "en" and target_lang == "EN-US":
+                return Result(text, "EN-US")
 
         try:
             translated_text = self.translator.translate_text(
@@ -78,19 +68,18 @@ class DeepLTranslator:
         except Exception as e:
             print("Error while translating text: ", e)
             return Result(text, "EN-US")
+
         if translated_text.detected_source_lang == "EN":
             translated_text.detected_source_lang = "EN-US"
         elif translated_text.detected_source_lang == "PT":
             translated_text.detected_source_lang = "PT-PT"
-        return Result(translated_text.text, translated_text.detected_source_lang)
 
-    def get_lang_detector(self, nlp, name):
-        return LanguageDetector()
+        return Result(translated_text.text, translated_text.detected_source_lang)
 
 
 if __name__ == "__main__":
     translator = DeepLTranslator()
-    result = translator.translate_to("Was sind xyhj", "EN-US")
+    result = translator.translate_to("Was sind abcd?", "EN-US")
     result2 = translator.translate_to("How are you", "EN-US")
 
     print(result.text)
