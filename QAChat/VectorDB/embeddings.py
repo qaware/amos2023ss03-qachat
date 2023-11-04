@@ -51,6 +51,11 @@ class Embeddings:
                             "indexFilterable": False,  # disable filterable index for this property
                             "indexSearchable": False,  # disable searchable index for this property
                         },
+                        {
+                            "name": "documentref",
+                            "dataType": ["Documents"], # reference to the documents class
+                            "description": "reference to the document",
+                        },
                     ],
                 }
             )

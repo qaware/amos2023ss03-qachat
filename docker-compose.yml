@@ -17,7 +17,7 @@ services:
       - qachat
 
   data_processing:
-    build: ./QAChat/Data_Processing
+    build: ./QAChat/Processors
     depends_on:
       - weaviate
     env_file:
@@ -26,8 +26,8 @@ services:
       - ./torch_data:/root/.cache/torch/
       - ./DummyData:/DummyData
       - ./QAChat/Common:/QAChat/Common
-      - ./QAChat/Data_Processing:/QAChat/Data_Processing
-    entrypoint: ["python", "/QAChat/Data_Processing/main.py", "DUMMY"]
+      - ./QAChat/Processor:/QAChat/Processor
+    entrypoint: ["python", "/QAChat/Processors/main.py", "DUMMY"]
     networks:
       - qachat
 

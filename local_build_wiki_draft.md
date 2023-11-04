@@ -63,7 +63,7 @@ After this activate it with:
 
 ***
 Now you activated the environment and need to download the required dependencies:
-Go in the "QAChat\Data_Processing" folder and run the following command:
+Go in the repository root folder and run the following command:
 **Windows:**
 
 ```` bash
@@ -76,9 +76,7 @@ pip install -r .\requirements.txt
 pip install -r ./requirements.txt
 ````
 
-Repeat the same process for the "QAChat\QA_Bot" and "QAChat\Slack_Bot" folders.
-
-When running the DataProcessing there can be a problem, that it can not find the needed spacy packages. It will be
+When running the Processor there can be a problem, that it can not find the needed spacy packages. It will be
 something like can not find package de_name_name_sm. To fix this download the needed models. Therefore, after installing
 the requirements run the following commands:
 
@@ -94,7 +92,6 @@ Go to the [Docker Website](https://docs.docker.com/engine/install/) and follow t
 ### 5. Add the tokens to the project
 
 Create a .txt file for your blacklist, for instance "blacklist.txt". You can put it wherever you want, but make sure to remember the path. It should look like this (first line included): 
-
 
     
 ```` bash

@@ -97,8 +97,7 @@ items=(
   "Database Maintenance"
   "Tests"
   "Fetchers"
-  "Fill DB with Dummy Data"
-  "Fill DB with Confluence Data"
+  "Embed fetched documents"
   "Run Slack Bot",
   "Run QA Bot")
 
@@ -108,8 +107,7 @@ do
         1) DBFunctions; break;;
         2) TestFunctions; break;;
         3) FetchFunctions; break;;
-        3) ${PYTHONEXEC} QAChat/Data_Processing/main.py DUMMY; break;;
-        4) ${PYTHONEXEC} QAChat/Data_Processing/main.py CONFLUENCE; break;;
+        4) ${PYTHONEXEC} QAChat/Processors/main.py; break;;
         5) ${PYTHONEXEC} QAChat/Slack_Bot/qa_agent.py; break;;
         6) ${PYTHONEXEC} QAChat/QA_Bot/qa_bot.py; break;;
         *) echo "Ooops - unknown choice $REPLY"; break;

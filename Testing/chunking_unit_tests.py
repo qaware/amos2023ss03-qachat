@@ -5,8 +5,8 @@ import math
 import unittest
 import pandas as pd
 
-from QAChat.Data_Processing.text_transformer import transform_text_to_chunks
-from QAChat.Data_Processing.text_transformer import CHUNK_SIZE
+from QAChat.Processors.text_transformer import transform_text_to_chunks
+from QAChat.Processors.text_transformer import CHUNK_SIZE
 from datetime import datetime
 from typing import List
 

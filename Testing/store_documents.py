@@ -20,7 +20,7 @@ if __name__ == "__main__":
             data_fetcher = ConfluenceFetcher()
         elif arg == "SLACK":
             print("Storing slack data")
-            #from QAChat.Data_Processing.preprocessor.slack_preprocessor import SlackPreprocessor
+            #from QAChat.Fetcher.preprocessor.slack_preprocessor import SlackPreprocessor
             #data_preprocessor = SlackPreprocessor()
         else:
             print("Sorry, wrong argument.")

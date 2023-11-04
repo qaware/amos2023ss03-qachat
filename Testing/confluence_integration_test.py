@@ -10,7 +10,7 @@ import string
 import os
 import io
 
-from QAChat.Data_Processing.pdf_reader import PDFReader
+from QAChat.Processors.pdf_reader import PDFReader
 
 # Get Confluence API credentials from environment variables
 CONFLUENCE_ADDRESS = os.getenv("CONFLUENCE_ADDRESS")
