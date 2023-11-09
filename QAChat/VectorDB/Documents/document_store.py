@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from QAChat.VectorDB.Documents.document_data import DocumentData, DocumentDataFormat, DocumentDataSource
 from QAChat.VectorDB.vectordb import VectorDB
 
@@ -102,7 +104,7 @@ class DocumentStore:
                 data_source = DocumentDataSource(prop["data_source"])
                 content = prop["content"]
                 title = prop["title"]
-                last_changed = prop["last_changed"]
+                last_changed = datetime.fromisoformat(prop["last_changed"])
                 link = prop["link"]
                 documents.append(DocumentData(uniq_id, _format, last_changed, data_source, content, title, link))
 

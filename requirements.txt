@@ -5,6 +5,5 @@
 -r QAChat/Slack_Bot/requirements.txt
 -r Testing/requirements.txt
 spacy
-spacy_langdetect
 weaviate-client
 spacy-language-detection
