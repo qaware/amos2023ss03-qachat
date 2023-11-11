@@ -17,11 +17,11 @@ while IFS= read -r line || [ -n "$line" ]; do
     export "$line"
 done < "$env_file"
 
-PYTHONEXEC=venv/bin/python3
-if [ ! -f "$PYTHONEXEC" ]; then
+if [ -f "venv/bin/python3" ]; then
     source venv/bin/activate
-    PYTHONEXEC=python3
 fi
+
+PYTHONEXEC=python3
 
 PS3="Select item please: "
 
@@ -114,7 +114,7 @@ do
         6) ${PYTHONEXEC} QAChat/QA_Bot/qa_bot.py; break;;
         7)
           sudo apt update
-          sudo apt install gcc cmake python3.10-venv
+          sudo apt install gcc g++ cmake python3.10-venv
           mkdir -p venv
           python3 -m venv venv
           source venv/bin/activate
