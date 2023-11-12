@@ -18,6 +18,7 @@ while IFS= read -r line || [ -n "$line" ]; do
 done < "$env_file"
 
 if [ -f "venv/bin/python3" ]; then
+    echo "Found venv. Activating..."
     source venv/bin/activate
 fi
 
@@ -59,7 +60,7 @@ function TestFunctions {
         "List All Confluence Spaces"
         "Confluence statistics"
         "Fetch Confluence Documents and write to stdout"
-        "Store Confluence Documents to json and txt files"
+        "Fetch Confluence Documents to json and txt files"
         "Language Detection Test"
         "DeepL Translation Test"
     )
@@ -94,34 +95,49 @@ function FetchFunctions {
     done
 }
 
+function SetupFunctions {
+    items=(
+        "Setup python"
+    )
+
+    select item in "${items[@]}"
+    do
+        case $REPLY in
+            1)
+              sudo apt update
+              sudo apt install gcc g++ cmake python3.10-venv
+              mkdir -p venv
+              python3 -m venv venv
+              source venv/bin/activate
+              pip install -r requirements.txt
+              ${PYTHONEXEC} -m spacy download xx_ent_wiki_sm
+              ${PYTHONEXEC} QAChat/Processors/setup.py
+              break;;
+            *) echo "Ooops - unknown choice $REPLY"; break;
+        esac
+    done
+}
+
+
 items=(
   "Database Maintenance"
+  "Setup"
   "Tests"
   "Fetchers"
   "Embed fetched documents"
-  "Run Slack Bot",
-  "Run QA Bot"
-  "Setup System")
+  "Run Slack Bot"
+  "Run QA Bot")
 
 select item in "${items[@]}"
 do
     case $REPLY in
         1) DBFunctions; break;;
-        2) TestFunctions; break;;
-        3) FetchFunctions; break;;
-        4) ${PYTHONEXEC} QAChat/Processors/main.py; break;;
-        5) ${PYTHONEXEC} QAChat/Slack_Bot/qa_agent.py; break;;
-        6) ${PYTHONEXEC} QAChat/QA_Bot/qa_bot.py; break;;
-        7)
-          sudo apt update
-          sudo apt install gcc g++ cmake python3.10-venv
-          mkdir -p venv
-          python3 -m venv venv
-          source venv/bin/activate
-          pip install -r requirements.txt
-          ${PYTHONEXEC} -m spacy download xx_ent_wiki_sm
-          ${PYTHONEXEC} QAChat/Processors/setup.py
-          break;;
+        2) SetupFunctions; break;;
+        3) TestFunctions; break;;
+        4) FetchFunctions; break;;
+        5) ${PYTHONEXEC} QAChat/Processors/main.py; break;;
+        6) ${PYTHONEXEC} QAChat/Slack_Bot/qa_agent.py; break;;
+        7) ${PYTHONEXEC} QAChat/QA_Bot/qa_bot.py; break;;
         *) echo "Ooops - unknown choice $REPLY"; break;
     esac
 done

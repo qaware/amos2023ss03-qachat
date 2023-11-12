@@ -1,13 +1,7 @@
+from QAChat.VectorDB.Embeddings.embedding_type import EmbeddingType
 from QAChat.VectorDB.vectordb import VectorDB
 
 from typing import List
-
-
-class EmbeddingType:
-    def __init__(self, page_id: str, chunk_id: str, last_update: str):
-        self.page_id = page_id
-        self.chunk_id = chunk_id
-        self.last_update = last_update
 
 
 class Embeddings:
@@ -31,6 +25,7 @@ class Embeddings:
                         }
                     },
                     "properties": [
+                        {"name": "created_at", "dataType": ["date"]},  # class entry creation date
                         {"name": "type_id", "dataType": ["text"]},
                         {
                             "name": "chunk",
@@ -38,7 +33,7 @@ class Embeddings:
                             "indexFilterable": False,  # disable filterable index for this property
                             "indexSearchable": False,  # disable searchable index for this property
                         },
-                        {"name": "type", "dataType": ["text"]},
+                        {"name": "data_source", "dataType": ["text"]},
                         {"name": "last_changed", "dataType": ["text"]},
                         {
                             "name": "text",
@@ -67,13 +62,13 @@ class Embeddings:
             .items()
         )
 
-    def get_all_for_documenttype(self, typestr: str) -> List[EmbeddingType]:
+    def get_all_for_documenttype(self, data_source: str) -> List[EmbeddingType]:
         data = (
             self.db.weaviate_client.query.get(
                 "Embeddings", ["type_id", "chunk", "last_changed"]
             )
             .with_where(
-                {"path": ["type"], "operator": "Equal", "valueString": typestr}
+                {"path": ["data_source"], "operator": "Equal", "valueString": data_source}
             )
             .do()["data"]["Get"]["Embeddings"]
         )

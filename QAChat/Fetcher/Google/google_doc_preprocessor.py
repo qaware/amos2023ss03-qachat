@@ -9,11 +9,11 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 
-from QAChat.Processors.preprocessor.data_preprocessor import DataPreprocessor
-from QAChat.Processors.preprocessor.data_information import DataSource
-from QAChat.Processors.pdf_reader import PDFReader
 from google.oauth2 import service_account
 import os
+
+from QAChat.Fetcher.PDF.pdf_reader import PDFReader
+from QAChat.VectorDB.Documents.document_data import DocumentDataSource
 
 
 class GoogleDocPreProcessor():
@@ -21,8 +21,8 @@ class GoogleDocPreProcessor():
         self.creds = None
         self.pdf_reader = PDFReader()
 
-    def get_source(self) -> DataSource:
-        return DataSource.DRIVE
+    def get_source(self) -> DocumentDataSource:
+        return DocumentDataSource.DRIVE
 
     def export_pdf(self, real_file_id):
         credentials = "credentials_file.json"

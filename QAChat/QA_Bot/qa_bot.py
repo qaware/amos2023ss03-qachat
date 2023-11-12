@@ -14,7 +14,7 @@ from QAChat.QA_Bot.stream_LLM_callback_handler import StreamLLMCallbackHandler
 
 from typing import List
 
-from QAChat.VectorDB.vector_store import VectorStore
+from QAChat.VectorDB.Embeddings.vector_store import VectorStore
 
 print("Init Lock")
 from threading import Lock

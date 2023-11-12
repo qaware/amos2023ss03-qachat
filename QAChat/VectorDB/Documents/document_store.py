@@ -18,10 +18,13 @@ class DocumentStore:
                         "skip": True  # disable vectorindex
                     },
                     "properties": [
-                        {"name": "uniq_id", "dataType": ["text"]},  ## UUID?
+                        {"name": "created_at", "dataType": ["date"]},  # class entry creation date
+                        {"name": "uniq_id", "dataType": ["text"]},  # UUID?
                         {"name": "format", "dataType": ["text"]},  # "CONFLUENCE_XML", "MARKDOWN", ....
+                        {"name": "language", "dataType": ["text"]},
                         {"name": "data_source", "dataType": ["text"]},
-                        {"name": "last_changed", "dataType": ["text"]},
+                        # The document last changed date from the source system (e.g. confluence)
+                        {"name": "last_changed", "dataType": ["date"]},
                         {
                             "name": "title",
                             "dataType": ["text"],
@@ -32,6 +35,13 @@ class DocumentStore:
                             "name": "content",
                             "dataType": ["text"],
                             "description": "the content as string",
+                            "indexFilterable": False,  # disable filterable index for this property
+                            "indexSearchable": False,  # disable searchable index for this property
+                        },
+                        {
+                            "name": "tags",
+                            "dataType": ["text[]"],
+                            "description": "tag information",
                             "indexFilterable": False,  # disable filterable index for this property
                             "indexSearchable": False,  # disable searchable index for this property
                         },
@@ -68,6 +78,7 @@ class DocumentStore:
         for document in all_changed_data:
             self.db.weaviate_client.data_object.create(
                 {
+                    "created_at": document.created_at.isoformat(),
                     "uniq_id": document.uniq_id,
                     "format": document.format.value,
                     "data_source": document.data_source.value,
@@ -106,7 +117,9 @@ class DocumentStore:
                 title = prop["title"]
                 last_changed = datetime.fromisoformat(prop["last_changed"])
                 link = prop["link"]
-                documents.append(DocumentData(uniq_id, _format, last_changed, data_source, content, title, link))
+                doc = DocumentData(uniq_id, _format, last_changed, data_source, content, title, link)
+                doc.created_at = datetime.fromisoformat(prop["created_at"])
+                documents.append(doc)
 
             if len(data) == 0:
                 break

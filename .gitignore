@@ -294,3 +294,7 @@ data/
 
 blacklist.txt
 login.sh
+documents.json
+documents.txt
+
+statistics/

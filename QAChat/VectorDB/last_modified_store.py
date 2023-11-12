@@ -4,7 +4,8 @@ from pprint import pprint
 from QAChat.VectorDB.Documents.document_data import DocumentDataSource
 from QAChat.VectorDB.vectordb import VectorDB
 
-class LastModified:
+
+class LastModifiedStore:
     def __init__(self):
         self.db = VectorDB()
 

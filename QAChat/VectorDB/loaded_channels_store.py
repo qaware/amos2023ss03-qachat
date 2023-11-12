@@ -1,7 +1,7 @@
 from QAChat.VectorDB.vectordb import VectorDB
 
 
-class LoadedChannels:
+class LoadedChannelsStore:
 
     def __init__(self):
         self.db = VectorDB()

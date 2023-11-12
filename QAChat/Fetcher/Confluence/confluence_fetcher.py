@@ -146,16 +146,7 @@ class ConfluenceFetcher(DataFetcher):
     def get_last_modified_formatted_date(self, page_info) -> datetime:
         # Get date of last modified page
         data_last_changed = page_info["version"]["when"]
-        year_string = data_last_changed[0:4]
-        month_string = data_last_changed[5:7]
-        day_string = data_last_changed[8:10]
-
-        # Convert string to int
-        year = int(year_string)
-        month = int(month_string)
-        day = int(day_string)
-
-        return datetime(year, month, day)
+        return datetime.fromisoformat(data_last_changed)
 
     def get_raw_text_from_page(self, page_with_body) -> str:
         # Get page content

@@ -9,9 +9,10 @@ from typing import List
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
+from QAChat.VectorDB.Documents.document_data import DocumentDataSource
 from QAChat.VectorDB.vectordb import VectorDB
-from QAChat.Processors.preprocessor.data_preprocessor import DataPreprocessor
-from QAChat.Processors.preprocessor.data_information import DataInformation, DataSource
+from QAChat.Fetcher.data_preprocessor import DataPreprocessor
+from QAChat.Processors.data_information import DataInformation
 
 SLACK_TOKEN = os.getenv("SLACK_TOKEN")
 if SLACK_TOKEN is None:
@@ -33,8 +34,8 @@ class SlackPreprocessor(DataPreprocessor):
         self.count_found_messages = 0
         self.db = VectorDB()
 
-    def get_source(self) -> DataSource:
-        return DataSource.SLACK
+    def get_source(self) -> DocumentDataSource:
+        return DocumentDataSource.SLACK
 
     def __map_users(self):
         for message in self.conversation_history:
@@ -135,7 +136,7 @@ class SlackPreprocessor(DataPreprocessor):
                     id=message["channel_id"] + "_" + message["ts"],
                     chunk=0,
                     last_changed=datetime.now(),
-                    typ=DataSource.SLACK,
+                    typ=DocumentDataSource.SLACK,
                     text=message["name"] + ": " + message["text"],
                     # text="<name>" + message["name"] + "</name>: " + message["text"],
                 )

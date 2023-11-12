@@ -1,14 +1,16 @@
 import os
+from datetime import datetime
 from typing import Any, List, Dict, Union
 
 from langchain.embeddings import HuggingFaceInstructEmbeddings
 from langchain.vectorstores import Weaviate
 
-from QAChat.Processors.preprocessor.data_information import DataInformation
+from QAChat.Processors.data_information import DataInformation
 from QAChat.VectorDB.vectordb import VectorDB
 
+
 class VectorStore:
-    def __init__(self, embeddings_gpu=True):
+    def __init__(self):
         self.db = VectorDB()
         VECTORIZER_DEVICE: str = os.getenv("VECTORIZER_DEVICE")
         if VECTORIZER_DEVICE is None:
@@ -48,12 +50,14 @@ class VectorStore:
             [data.text for data in all_changed_data],
             [
                 {
+                    "created_at": datetime.now().isoformat(),
                     "type_id": data.id,
                     "chunk": data.chunk,
-                    "type": data.typ.value,
+                    "data_source": data.data_source.value,
                     "last_changed": data.last_changed.isoformat(),
                     "text": data.text,
                     "link": data.link,
+                    # "documentref":,
                 }
                 for data in all_changed_data
             ],

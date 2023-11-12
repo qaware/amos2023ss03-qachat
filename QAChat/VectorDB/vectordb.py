@@ -1,11 +1,11 @@
 import os
+import re
 import sys
 import textwrap
-from typing import List
 
 import weaviate
 from prettytable import PrettyTable
-import re
+
 
 class VectorDB:
     def __init__(self):

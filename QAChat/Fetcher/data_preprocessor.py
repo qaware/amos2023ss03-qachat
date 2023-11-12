@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import List
 
-from QAChat.Processors.preprocessor.data_information import DataInformation
+from QAChat.Processors.data_information import DataInformation
 from QAChat.VectorDB.Documents.document_data import DocumentDataSource
 
 

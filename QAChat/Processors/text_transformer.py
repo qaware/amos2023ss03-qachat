@@ -7,7 +7,7 @@ from typing import List
 import nltk
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-from QAChat.Processors.preprocessor.data_information import DataInformation
+from QAChat.Processors.data_information import DataInformation
 from QAChat.VectorDB.Documents.document_data import DocumentData
 
 CHUNK_SIZE = 200

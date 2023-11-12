@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 
 class DocumentDataSource(Enum):
@@ -14,6 +14,7 @@ class DocumentDataFormat(Enum):
 class DocumentData:
     def __init__(self, uniq_id: str, _format: DocumentDataFormat, last_changed: datetime, data_source: DocumentDataSource, content: str, title: str = None,
                  link: str = None):
+        self.created_at: datetime = datetime.now(timezone.utc)
         self.uniq_id: str = uniq_id
         self.format: DocumentDataFormat = _format
         self.last_changed: datetime = last_changed

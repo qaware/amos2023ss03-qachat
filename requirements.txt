@@ -3,7 +3,9 @@
 -r QAChat/Processors/requirements.txt
 -r QAChat/QA_Bot/requirements.txt
 -r QAChat/Slack_Bot/requirements.txt
+-r QAChat/Documents/requirements.txt
+-r QAChat/VectorDB/requirements.txt
 -r Testing/requirements.txt
+prettytable
 spacy
-weaviate-client
 spacy-language-detection

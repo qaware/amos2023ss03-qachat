@@ -3,9 +3,9 @@
 import sys
 
 from QAChat.VectorDB.Documents.document_store import DocumentStore
-from QAChat.VectorDB.embeddings import Embeddings
-from QAChat.VectorDB.last_modified import LastModified
-from QAChat.VectorDB.loaded_channels import LoadedChannels
+from QAChat.VectorDB.Embeddings.embeddings import Embeddings
+from QAChat.VectorDB.last_modified_store import LastModifiedStore
+from QAChat.VectorDB.loaded_channels_store import LoadedChannelsStore
 from QAChat.VectorDB.vectordb import VectorDB
 
 db = VectorDB()
@@ -37,9 +37,9 @@ if __name__ == "__main__":
         db.clear_db()
     elif arg == "INIT":
         DocumentStore().init_class()
-        LastModified().init_class()
+        LastModifiedStore().init_class()
         Embeddings().init_class()
-        LoadedChannels().init_class()
+        LoadedChannelsStore().init_class()
     else:
         print("Sorry, wrong argument.")
         sys.exit(1)

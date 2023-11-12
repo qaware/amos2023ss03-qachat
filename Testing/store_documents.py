@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2023 Jesse Palarus
 # SPDX-FileCopyrightText: 2023 Amela Pucic
-import sys
 import json
+import sys
 from datetime import datetime
 from enum import Enum
 
-from QAChat.Common.deepL_translator import DeepLTranslator
+from QAChat.Documents.document_transformer import DocumentTransformer
 
 if __name__ == "__main__":
     for arg in sys.argv[1:]:
@@ -36,9 +36,8 @@ if __name__ == "__main__":
 
         print("Loaded " + str(len(documents)) + " documents with " + str(nchars) + " characters.")
 
-        translator = DeepLTranslator()
-        #for doc in documents:
-        #    doc.text = translator.translate_to(doc.text, "EN-US").text
+        transformer = DocumentTransformer()
+        transformer.transform(documents)
 
         def dumper(obj):
             if isinstance(obj, datetime):

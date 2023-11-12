@@ -1,2 +1,8 @@
 atlassian-python-api
-weaviate-client
+slack-sdk
+pydrive2
+google-api-python-client
+google-auth
+google-auth-oauthlib
+pdf2image
+pdfminer.six
