@@ -2,16 +2,18 @@ import io
 import os
 import re
 from datetime import datetime
+from pprint import pprint
 from typing import List
 
+import dateutil.parser
 import requests
 from atlassian import Confluence
+
+from QAChat.Fetcher.Confluence.confluence_page import ConfluencePage
 from QAChat.Fetcher.data_fetcher import DataFetcher
 from QAChat.Fetcher.Confluence.filter_manager import FilterManager
 from QAChat.Fetcher.PDF.pdf_reader import PDFReader
-from QAChat.VectorDB.Documents.document_data import DocumentData, DocumentDataSource, DocumentDataFormat
-
-# TODO: How do removed documents look like?
+from QAChat.VectorDB.Documents.document_data import DocumentData, DocumentDataSource
 
 # Get Confluence API credentials from environment variables
 CONFLUENCE_ADDRESS = os.getenv("CONFLUENCE_ADDRESS")
@@ -34,7 +36,7 @@ class ConfluenceFetcher(DataFetcher):
             password=CONFLUENCE_TOKEN,
         )
         self.pdf_reader = PDFReader()
-        self.page_information : List[DocumentData] = []
+        self.page_information : List[ConfluencePage] = []
         self.filter_manager = FilterManager()
 
     def get_source(self) -> DocumentDataSource:
@@ -91,7 +93,7 @@ class ConfluenceFetcher(DataFetcher):
 
         return page_ids
 
-    def get_data_from_page(self, page_id) -> DocumentData:
+    def get_data_from_page(self, page_id) -> ConfluencePage:
         # Get page by id
         page_with_body = self.confluence.get_page_by_id(
             page_id,
@@ -105,6 +107,8 @@ class ConfluenceFetcher(DataFetcher):
             status=None,
             version=None
         )
+        #print("-------------------------------")
+        #pprint(page_info)
         # Set final parameters for DataInformation
         last_changed = self.get_last_modified_formatted_date(page_info)
         text = self.get_raw_text_from_page(page_with_body)
@@ -133,11 +137,9 @@ class ConfluenceFetcher(DataFetcher):
         # print(f"Länge {page_id}: %d \n" % len(text))
         # Add Page content to list of DocumentData
         # print(page_info["_links"]["base"] + page_info["_links"]["webui"].split("overview")[0])
-        return DocumentData(
+        return ConfluencePage(
                 uniq_id=page_id,
-                _format=DocumentDataFormat.CONFLUENCE,
                 last_changed=last_changed,
-                data_source=DocumentDataSource.CONFLUENCE,
                 content=text,
                 title=page_info["title"],
                 link=page_info["_links"]["base"] + page_info["_links"]["webui"].split("overview")[0],
@@ -146,7 +148,7 @@ class ConfluenceFetcher(DataFetcher):
     def get_last_modified_formatted_date(self, page_info) -> datetime:
         # Get date of last modified page
         data_last_changed = page_info["version"]["when"]
-        return datetime.fromisoformat(data_last_changed)
+        return dateutil.parser.isoparse(data_last_changed)
 
     def get_raw_text_from_page(self, page_with_body) -> str:
         # Get page content
@@ -233,7 +235,7 @@ class ConfluenceFetcher(DataFetcher):
                 page = self.get_data_from_page(page_id)
                 self.page_information.append(page)
 
-        return [data for data in self.page_information]
+        return [data.to_document_data() for data in self.page_information]
 
 if __name__ == "__main__":
     cf = ConfluenceFetcher()
