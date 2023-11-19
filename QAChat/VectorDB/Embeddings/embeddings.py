@@ -5,7 +5,7 @@ from typing import List
 
 
 class Embeddings:
-    def __init__(self, embeddings_gpu=True):
+    def __init__(self):
         self.db = VectorDB()
 
     def init_class(self):
@@ -13,7 +13,7 @@ class Embeddings:
             self.db.weaviate_client.schema.create_class(
                 {
                     "class": "Embeddings",
-                    "vectorizer": "none",  # We want to import your own vectors
+                    "vectorizer": "none",  # We want to import our own vectors
                     "vectorIndexType": "hnsw",  # default
                     "vectorIndexConfig": {
                         "distance": "cosine",
@@ -48,7 +48,7 @@ class Embeddings:
                         },
                         {
                             "name": "documentref",
-                            "dataType": ["Documents"], # reference to the documents class
+                            "dataType": ["Documents"],  # reference to the documents class
                             "description": "reference to the document",
                         },
                     ],

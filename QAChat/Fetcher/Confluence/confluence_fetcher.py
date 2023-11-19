@@ -107,8 +107,11 @@ class ConfluenceFetcher(DataFetcher):
             status=None,
             version=None
         )
+
         #print("-------------------------------")
+        #print(page_children)
         #pprint(page_info)
+
         # Set final parameters for DataInformation
         last_changed = self.get_last_modified_formatted_date(page_info)
         text = self.get_raw_text_from_page(page_with_body)
@@ -137,13 +140,21 @@ class ConfluenceFetcher(DataFetcher):
         # print(f"Länge {page_id}: %d \n" % len(text))
         # Add Page content to list of DocumentData
         # print(page_info["_links"]["base"] + page_info["_links"]["webui"].split("overview")[0])
-        return ConfluencePage(
-                uniq_id=page_id,
-                last_changed=last_changed,
-                content=text,
-                title=page_info["title"],
-                link=page_info["_links"]["base"] + page_info["_links"]["webui"].split("overview")[0],
-            )
+
+        page = ConfluencePage(
+            page_id=page_id,
+            last_changed=last_changed,
+            content=text,
+            title=page_info["title"],
+            link=page_info["_links"]["base"] + page_info["_links"]["webui"].split("overview")[0],
+        )
+
+        child_pages = self.confluence.get_child_pages(page_id)
+        for child_page in child_pages:
+            page.child_pages.append(child_page["id"])
+            #print(f"Page Title: {page['title']}, Page ID: {page['id']}")
+
+        return page
 
     def get_last_modified_formatted_date(self, page_info) -> datetime:
         # Get date of last modified page
@@ -223,6 +234,34 @@ class ConfluenceFetcher(DataFetcher):
                                 continue
         return pdf_content
 
+    # set parent page for all pages and set the toc path
+    def set_parent_and_fill_title(self):
+        # create a map structure with page_id as key and page as value
+        page_map : dict[str, ConfluencePage] = {}
+        for page in self.page_information:
+            page_map[page.page_id] = page
+
+        # iterate over all pages
+        for page in self.page_information:
+            # iterate over all child pages
+            for child_page_id in page.child_pages:
+                # set parent page
+                page_map[child_page_id].parent_page = page.page_id
+
+        # based on the parent page, set the toc path
+        # iterate over all pages
+        for page in self.page_information:
+            path = ""
+            iterate_page = page
+            # iterate over all parent pages
+            while iterate_page.parent_page is not None:
+                # add parent page to path
+                path = iterate_page.title + " / " + path
+                # set next parent page
+                iterate_page = page_map[iterate_page.parent_page]
+            # set path
+            page.title = path
+
     def load_preprocessed_data(
             self, end_of_timeframe: datetime, start_of_timeframe: datetime
     ) -> List[DocumentData]:
@@ -231,10 +270,12 @@ class ConfluenceFetcher(DataFetcher):
         for space in all_spaces:
             print("Load Space: " + space)
             page_ids : List[str] =  self.get_page_ids_from_spaces(space)
+
             for page_id in page_ids:
                 page = self.get_data_from_page(page_id)
                 self.page_information.append(page)
 
+        self.set_parent_and_fill_title()
         return [data.to_document_data() for data in self.page_information]
 
 if __name__ == "__main__":
@@ -251,7 +292,7 @@ if __name__ == "__main__":
         print(i.uniq_id)
         print(i.format)
         print(i.title)
-        print(i.content)
-        print(len(i.content))
         print(i.last_changed)
+        print("length:", len(i.content))
+        #print(i.content)
         print("----" * 5)
