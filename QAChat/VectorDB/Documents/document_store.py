@@ -107,18 +107,22 @@ class DocumentStore:
             data = (
                 self.db.weaviate_client.data_object.get(class_name="Documents", after=document_uuid, limit=1000)['objects']
             )
-            print("Paging: Got", len(data), "documents")
+            print("  Paging: Got", len(data), "documents")
             for d in data:
                 prop = d['properties']
                 uniq_id = prop["uniq_id"]
                 _format = DocumentDataFormat(prop["format"])
                 data_source = DocumentDataSource(prop["data_source"])
                 content = prop["content"]
-                title = prop["title"]
-                last_changed = datetime.fromisoformat(prop["last_changed"])
+                if "title" not in prop:
+                    title = None
+                else:
+                    title = prop["title"]
                 link = prop["link"]
+                last_changed = datetime.fromisoformat(prop["last_changed"])
                 doc = DocumentData(uniq_id, _format, last_changed, data_source, content, title, link)
                 doc.created_at = datetime.fromisoformat(prop["created_at"])
+                doc.uuid = d['id']
                 documents.append(doc)
 
             if len(data) == 0:

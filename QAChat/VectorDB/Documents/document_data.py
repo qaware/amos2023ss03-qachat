@@ -1,3 +1,4 @@
+import typing
 from datetime import datetime, timezone
 from enum import Enum
 
@@ -22,3 +23,4 @@ class DocumentData:
         self.content: str = content
         self.title: str = title
         self.link: str = link
+        self.uuid: typing.Optional[str] = None  # filled by Weaviate, used for cross-references

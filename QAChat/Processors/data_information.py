@@ -1,3 +1,4 @@
+import typing
 from datetime import datetime
 
 from QAChat.VectorDB.Documents.document_data import DocumentDataSource
@@ -13,3 +14,4 @@ class DataInformation:
         self.text: str = text
         self.title: str = title
         self.link: str = link
+        self.document_ref_uuid: typing.Optional[str] = None  # reference to the document in the Documents Class

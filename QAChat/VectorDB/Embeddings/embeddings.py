@@ -26,6 +26,7 @@ class Embeddings:
                     },
                     "properties": [
                         {"name": "created_at", "dataType": ["date"]},  # class entry creation date
+                        {"name": "last_changed", "dataType": ["text"]},
                         {"name": "type_id", "dataType": ["text"]},
                         {
                             "name": "chunk",
@@ -34,7 +35,6 @@ class Embeddings:
                             "indexSearchable": False,  # disable searchable index for this property
                         },
                         {"name": "data_source", "dataType": ["text"]},
-                        {"name": "last_changed", "dataType": ["text"]},
                         {
                             "name": "text",
                             "dataType": ["text"],
@@ -47,7 +47,7 @@ class Embeddings:
                             "indexSearchable": False,  # disable searchable index for this property
                         },
                         {
-                            "name": "documentref",
+                            "name": "document_ref",
                             "dataType": ["Documents"],  # reference to the documents class
                             "description": "reference to the document",
                         },

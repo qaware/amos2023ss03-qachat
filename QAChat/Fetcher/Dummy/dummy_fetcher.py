@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
 import pandas as pd
@@ -23,7 +23,7 @@ class DummyFetcher(DataFetcher):
                 DocumentData(
                     uniq_id=f"{index}",
                     _format=DocumentDataFormat.TEXT,
-                    last_changed=datetime(2021, 1, 1),
+                    last_changed=datetime(2021, 1, 1, tzinfo=timezone.utc),
                     data_source=DocumentDataSource.DUMMY,
                     content=row["Answer"],
                     link="https://www.test.com",

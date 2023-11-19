@@ -47,6 +47,7 @@ def transform_text_to_chunks(data_information_list: List[DocumentData]) -> List[
                 data_information.title,
                 data_information.link
             )
+            new_data_information.document_ref_uuid = data_information.uuid
             new_data_information_list.append(new_data_information)
 
     return new_data_information_list
