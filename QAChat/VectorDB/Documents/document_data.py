@@ -1,6 +1,8 @@
 import typing
+import uuid
 from datetime import datetime, timezone
 from enum import Enum
+
 
 class DocumentDataSource(Enum):
     SLACK = "slack"
@@ -8,13 +10,17 @@ class DocumentDataSource(Enum):
     DRIVE = "drive"
     DUMMY = "dummy"
 
+
 class DocumentDataFormat(Enum):
     CONFLUENCE = "CONFLUENCE_XML"
     TEXT = "TEXT"
 
-class DocumentData:
-    def __init__(self, uniq_id: str, _format: DocumentDataFormat, last_changed: datetime, data_source: DocumentDataSource, content: str, title: str = None,
+
+class DocumentDto:
+    def __init__(self, uniq_id: str, _format: DocumentDataFormat, last_changed: datetime,
+                 data_source: DocumentDataSource, content: str, title: str = None,
                  link: str = None):
+        self.uuid: typing.Optional[uuid.UUID] = None  # filled by Weaviate, used for cross-references
         self.created_at: datetime = datetime.now(timezone.utc)
         self.uniq_id: str = uniq_id
         self.format: DocumentDataFormat = _format
@@ -23,4 +29,3 @@ class DocumentData:
         self.content: str = content
         self.title: str = title
         self.link: str = link
-        self.uuid: typing.Optional[str] = None  # filled by Weaviate, used for cross-references

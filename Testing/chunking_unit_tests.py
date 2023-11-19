@@ -10,7 +10,7 @@ from QAChat.Processors.text_transformer import CHUNK_SIZE
 from datetime import datetime
 from typing import List
 
-from QAChat.VectorDB.Documents.document_data import DocumentData, DocumentDataSource, DocumentDataFormat
+from QAChat.VectorDB.Documents.document_data import DocumentDto, DocumentDataSource, DocumentDataFormat
 
 
 class TestChunking(unittest.TestCase):
@@ -21,12 +21,12 @@ class TestChunking(unittest.TestCase):
     @staticmethod
     def __load_preprocessed_data(
         before: datetime, after: datetime, filepath: str
-    ) -> List[DocumentData]:
+    ) -> List[DocumentDto]:
         df = pd.read_csv(filepath, sep=";")
         raw_data = []
         for index, row in df.iterrows():
             raw_data.append(
-                DocumentData(
+                DocumentDto(
                     uniq_id=f"{index}",
                     _format=DocumentDataFormat.TEXT,
                     last_changed=datetime(2021, 1, 1),

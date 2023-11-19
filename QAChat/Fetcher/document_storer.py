@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from QAChat.Fetcher.data_fetcher import DataFetcher
-from QAChat.VectorDB.Documents.document_data import DocumentData
+from QAChat.VectorDB.Documents.document_data import DocumentDto
 from QAChat.VectorDB.Documents.document_store import DocumentStore
 from QAChat.VectorDB.last_modified_store import LastModifiedStore
 
@@ -15,7 +15,7 @@ class DocumentStorer:
               + data_fetcher.get_source().value
               + " and start date "
               + last_updated.isoformat())
-        all_changed_data: list[DocumentData] = data_fetcher.load_preprocessed_data(
+        all_changed_data: list[DocumentDto] = data_fetcher.load_preprocessed_data(
                 current_time, last_updated
             )
         print("Loaded " + str(len(all_changed_data)) + " documents.")

@@ -1,4 +1,4 @@
-from QAChat.VectorDB.Embeddings.embedding_type import EmbeddingType
+from QAChat.VectorDB.Embeddings.embedding_result_dto import EmbeddingResultDto
 from QAChat.VectorDB.vectordb import VectorDB
 
 from typing import List
@@ -62,7 +62,7 @@ class Embeddings:
             .items()
         )
 
-    def get_all_for_documenttype(self, data_source: str) -> List[EmbeddingType]:
+    def get_all_for_documenttype(self, data_source: str) -> List[EmbeddingResultDto]:
         data = (
             self.db.weaviate_client.query.get(
                 "Embeddings", ["type_id", "chunk", "last_changed"]
@@ -74,10 +74,10 @@ class Embeddings:
         )
         embedded = []
         for d in data:
-            page_id = d["id"]
+            type_id = d["type_id"]
             chunk_id = d["chunk"]
             last_update = d["last_changed"]
-            embedded.append(EmbeddingType(page_id, chunk_id, last_update))
+            embedded.append(EmbeddingResultDto(type_id, chunk_id, last_update))
 
         return embedded
 

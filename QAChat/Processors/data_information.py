@@ -2,6 +2,7 @@ import typing
 from datetime import datetime
 
 from QAChat.VectorDB.Documents.document_data import DocumentDataSource
+from QAChat.VectorDB.Embeddings.embedding_dto import EmbeddingDto
 
 
 class DataInformation:
@@ -15,3 +16,12 @@ class DataInformation:
         self.title: str = title
         self.link: str = link
         self.document_ref_uuid: typing.Optional[str] = None  # reference to the document in the Documents Class
+
+    def to_embedding_dto(self) -> EmbeddingDto:
+        return EmbeddingDto(
+            chunk_id=self.chunk,
+            type_id=self.id,
+            last_update=self.last_changed,
+            text=self.text,
+            link=self.link,
+            data_source=self.data_source.value)

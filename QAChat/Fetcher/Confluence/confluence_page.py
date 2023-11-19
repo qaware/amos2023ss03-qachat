@@ -2,7 +2,7 @@ import typing
 from datetime import datetime, timezone
 from typing import List
 
-from QAChat.VectorDB.Documents.document_data import DocumentData, DocumentDataFormat, DocumentDataSource
+from QAChat.VectorDB.Documents.document_data import DocumentDto, DocumentDataFormat, DocumentDataSource
 
 
 class ConfluencePage:
@@ -18,8 +18,8 @@ class ConfluencePage:
         self.child_pages: List[str] = []
         self.parent_page: typing.Optional[str] = None
 
-    def to_document_data(self) -> DocumentData:
-        doc = DocumentData(
+    def to_document_data(self) -> DocumentDto:
+        doc = DocumentDto(
             uniq_id=self.page_id,
             _format=DocumentDataFormat.CONFLUENCE,
             last_changed=self.last_changed,

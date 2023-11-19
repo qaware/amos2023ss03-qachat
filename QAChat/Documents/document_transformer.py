@@ -1,6 +1,6 @@
 from QAChat.Common.deepL_translator import DeepLTranslator
 from QAChat.Documents.html_to_text import get_text_markdonify
-from QAChat.VectorDB.Documents.document_data import DocumentData, DocumentDataFormat
+from QAChat.VectorDB.Documents.document_data import DocumentDto, DocumentDataFormat
 
 
 class DocumentTransformer:
@@ -8,7 +8,7 @@ class DocumentTransformer:
     def __init__(self):
         self.translator = DeepLTranslator()
 
-    def transform(self, documents: list[DocumentData]):
+    def transform(self, documents: list[DocumentDto]):
         print("Loaded " + str(len(documents)) + " documents.")
 
         for idx in range(len(documents)):

@@ -1,7 +1,10 @@
 from datetime import datetime
 
-from QAChat.VectorDB.Documents.document_data import DocumentData, DocumentDataFormat, DocumentDataSource
+import dateutil.parser
+
+from QAChat.VectorDB.Documents.document_data import DocumentDto, DocumentDataFormat, DocumentDataSource
 from QAChat.VectorDB.vectordb import VectorDB
+
 
 class DocumentStore:
 
@@ -55,7 +58,7 @@ class DocumentStore:
                 }
             )
 
-    def update_add_texts(self, all_changed_data: list[DocumentData]):
+    def update_add_texts(self, all_changed_data: list[DocumentDto]):
         print("Update", len(all_changed_data), "Texts")
         print("Delete texts")
 
@@ -99,13 +102,14 @@ class DocumentStore:
             },
         )
 
-    def get_all_documents(self)-> list[DocumentData]:
-        documents: list[DocumentData] = []
+    def get_all_documents(self) -> list[DocumentDto]:
+        documents: list[DocumentDto] = []
 
         document_uuid = None
         while True:
             data = (
-                self.db.weaviate_client.data_object.get(class_name="Documents", after=document_uuid, limit=1000)['objects']
+                self.db.weaviate_client.data_object.get(class_name="Documents", after=document_uuid, limit=1000)[
+                    'objects']
             )
             print("  Paging: Got", len(data), "documents")
             for d in data:
@@ -119,9 +123,9 @@ class DocumentStore:
                 else:
                     title = prop["title"]
                 link = prop["link"]
-                last_changed = datetime.fromisoformat(prop["last_changed"])
-                doc = DocumentData(uniq_id, _format, last_changed, data_source, content, title, link)
-                doc.created_at = datetime.fromisoformat(prop["created_at"])
+                last_changed = dateutil.parser.isoparse(prop["last_changed"])
+                doc = DocumentDto(uniq_id, _format, last_changed, data_source, content, title, link)
+                doc.created_at = dateutil.parser.isoparse(prop["created_at"])
                 doc.uuid = d['id']
                 documents.append(doc)
 
@@ -130,4 +134,3 @@ class DocumentStore:
             document_uuid = data[-1]['id']
 
         return documents
-        

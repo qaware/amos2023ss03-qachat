@@ -4,7 +4,7 @@ from typing import List
 import pandas as pd
 
 from QAChat.Fetcher.data_fetcher import DataFetcher
-from QAChat.VectorDB.Documents.document_data import DocumentData, DocumentDataFormat, DocumentDataSource
+from QAChat.VectorDB.Documents.document_data import DocumentDto, DocumentDataFormat, DocumentDataSource
 
 
 class DummyFetcher(DataFetcher):
@@ -14,13 +14,13 @@ class DummyFetcher(DataFetcher):
 
     def load_preprocessed_data(
         self, end_of_timeframe: datetime, start_of_timeframe: datetime
-    ) -> List[DocumentData]:
+    ) -> List[DocumentDto]:
         df = pd.read_csv("./DummyData/qa.csv", sep=";")
 
         raw_data = []
         for index, row in df.iterrows():
             raw_data.append(
-                DocumentData(
+                DocumentDto(
                     uniq_id=f"{index}",
                     _format=DocumentDataFormat.TEXT,
                     last_changed=datetime(2021, 1, 1, tzinfo=timezone.utc),

@@ -1,11 +1,10 @@
 import os
-from datetime import datetime, timezone
 from typing import Any, List, Dict, Union
 
 from langchain.embeddings import HuggingFaceInstructEmbeddings
 from langchain.vectorstores import Weaviate
 
-from QAChat.Processors.data_information import DataInformation
+from QAChat.VectorDB.Embeddings.embedding_dto import EmbeddingDto
 from QAChat.VectorDB.vectordb import VectorDB
 
 
@@ -29,12 +28,12 @@ class VectorStore:
             text_key="text",
         )
 
-    def update_add_texts(self, all_changed_data : list[DataInformation]):
-        print("delete texts")
+    def remove_texts(self, all_changed_data: list[EmbeddingDto]):
+        print("remove texts")
 
         ids: set[str] = set()
         for data in all_changed_data:
-            ids.add(data.id)
+            ids.add(data.type_id)
 
         for type_id in ids:
             self.db.weaviate_client.batch.delete_objects(
@@ -45,23 +44,26 @@ class VectorStore:
                     "valueString": type_id,
                 },
             )
+
+    def store_texts(self, all_changed_data: list[EmbeddingDto]):
         print("store texts")
 
         self.vector_store.add_texts(
-            [data.text for data in all_changed_data],
-            [
+            texts=[data.text for data in all_changed_data],
+            ids=[str(data.uuid) for data in all_changed_data],
+            metadatas=[
                 {
-                    "created_at": datetime.now(timezone.utc).isoformat(),
-                    "type_id": data.id,
-                    "chunk": data.chunk,
-                    "data_source": data.data_source.value,
-                    "last_changed": data.last_changed.isoformat(),
+                    "created_at": data.created_at,
+                    "type_id": data.type_id,
+                    "chunk": data.chunk_id,
+                    "data_source": data.data_source,
+                    "last_changed": data.last_update.isoformat(),
                     "text": data.text,
                     "link": data.link
-                    #"document_ref": data.document_ref_uuid
+                    # "document_ref": data.document_ref_uuid
                 }
                 for data in all_changed_data
-            ],
+            ]
         )
 
     def sim_search(self, question: str) -> dict[str, list[str | dict[str, Any]]]:
@@ -89,7 +91,7 @@ class VectorStore:
         # ]
 
         # Search for similar documents and get the metadata and content arrays
-        result = self.search_similar_documents(
+        result: List = self.search_similar_documents(
             k=3,
             embedding=embedding,
             text_key=["text"],

@@ -3,18 +3,19 @@
 # SPDX-FileCopyrightText: 2023 Felix Nützel
 
 from typing import List
+from uuid import UUID
 
 import nltk
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 from QAChat.Processors.data_information import DataInformation
-from QAChat.VectorDB.Documents.document_data import DocumentData
+from QAChat.VectorDB.Documents.document_data import DocumentDto
 
 CHUNK_SIZE = 200
 CHUNK_OVERLAP = 50
 
 
-def transform_text_to_chunks(data_information_list: List[DocumentData]) -> List[DataInformation]:
+def transform_text_to_chunks(data_information_list: List[DocumentDto]) -> List[DataInformation]:
     """
     Splits the data information needed for our vector database into chunks.
 
@@ -47,7 +48,7 @@ def transform_text_to_chunks(data_information_list: List[DocumentData]) -> List[
                 data_information.title,
                 data_information.link
             )
-            new_data_information.document_ref_uuid = data_information.uuid
+            new_data_information.document_ref_uuid = UUID(data_information.uuid)
             new_data_information_list.append(new_data_information)
 
     return new_data_information_list

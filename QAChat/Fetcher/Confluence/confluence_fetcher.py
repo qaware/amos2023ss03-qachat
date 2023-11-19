@@ -13,7 +13,7 @@ from QAChat.Fetcher.Confluence.confluence_page import ConfluencePage
 from QAChat.Fetcher.data_fetcher import DataFetcher
 from QAChat.Fetcher.Confluence.filter_manager import FilterManager
 from QAChat.Fetcher.PDF.pdf_reader import PDFReader
-from QAChat.VectorDB.Documents.document_data import DocumentData, DocumentDataSource
+from QAChat.VectorDB.Documents.document_data import DocumentDto, DocumentDataSource
 
 # Get Confluence API credentials from environment variables
 CONFLUENCE_ADDRESS = os.getenv("CONFLUENCE_ADDRESS")
@@ -28,6 +28,7 @@ CONFLUENCE_TOKEN = os.getenv("CONFLUENCE_TOKEN")
 if CONFLUENCE_TOKEN is None:
     raise ValueError("Please set CONFLUENCE_TOKEN environment variable")
 
+
 class ConfluenceFetcher(DataFetcher):
     def __init__(self):
         self.confluence = Confluence(
@@ -36,7 +37,7 @@ class ConfluenceFetcher(DataFetcher):
             password=CONFLUENCE_TOKEN,
         )
         self.pdf_reader = PDFReader()
-        self.page_information : List[ConfluencePage] = []
+        self.page_information: List[ConfluencePage] = []
         self.filter_manager = FilterManager()
 
     def get_source(self) -> DocumentDataSource:
@@ -108,9 +109,9 @@ class ConfluenceFetcher(DataFetcher):
             version=None
         )
 
-        #print("-------------------------------")
-        #print(page_children)
-        #pprint(page_info)
+        # print("-------------------------------")
+        # print(page_children)
+        # pprint(page_info)
 
         # Set final parameters for DataInformation
         last_changed = self.get_last_modified_formatted_date(page_info)
@@ -152,7 +153,7 @@ class ConfluenceFetcher(DataFetcher):
         child_pages = self.confluence.get_child_pages(page_id)
         for child_page in child_pages:
             page.child_pages.append(child_page["id"])
-            #print(f"Page Title: {page['title']}, Page ID: {page['id']}")
+            # print(f"Page Title: {page['title']}, Page ID: {page['id']}")
 
         return page
 
@@ -166,24 +167,24 @@ class ConfluenceFetcher(DataFetcher):
         page_in_html = page_with_body["body"]["storage"]["value"]
         return page_in_html
         # return page_in_html
-        #return get_text(page_in_html)
-        #return get_text_markdonify(page_in_html)
+        # return get_text(page_in_html)
+        # return get_text_markdonify(page_in_html)
 
-#    def get_content_from_google_drive(self, urls):
-#        pdf_content = ""
-#
-#        # go through all urls
-#        for url in urls:
-#            # get id from url
-#            google_drive_id = url.split("/d/")[1].split("/")[0]
-#
-#            # get pdf by id
-#            pdf_bytes = self.g_docs_proc.export_pdf(google_drive_id)
-#
-#            # get content from pdf
-#            pdf_content += self.pdf_reader.read_pdf(pdf_bytes) + " "
+    #    def get_content_from_google_drive(self, urls):
+    #        pdf_content = ""
+    #
+    #        # go through all urls
+    #        for url in urls:
+    #            # get id from url
+    #            google_drive_id = url.split("/d/")[1].split("/")[0]
+    #
+    #            # get pdf by id
+    #            pdf_bytes = self.g_docs_proc.export_pdf(google_drive_id)
+    #
+    #            # get content from pdf
+    #            pdf_content += self.pdf_reader.read_pdf(pdf_bytes) + " "
 
-#        return pdf_content
+    #        return pdf_content
 
     def get_content_from_page_attachments(self, page_id) -> str:
         start = 0
@@ -237,7 +238,7 @@ class ConfluenceFetcher(DataFetcher):
     # set parent page for all pages and set the toc path
     def set_parent_and_fill_title(self):
         # create a map structure with page_id as key and page as value
-        page_map : dict[str, ConfluencePage] = {}
+        page_map: dict[str, ConfluencePage] = {}
         for page in self.page_information:
             page_map[page.page_id] = page
 
@@ -264,12 +265,12 @@ class ConfluenceFetcher(DataFetcher):
 
     def load_preprocessed_data(
             self, end_of_timeframe: datetime, start_of_timeframe: datetime
-    ) -> List[DocumentData]:
+    ) -> List[DocumentDto]:
 
         all_spaces: List[str] = self.get_all_spaces()
         for space in all_spaces:
             print("Load Space: " + space)
-            page_ids : List[str] =  self.get_page_ids_from_spaces(space)
+            page_ids: List[str] = self.get_page_ids_from_spaces(space)
 
             for page_id in page_ids:
                 page = self.get_data_from_page(page_id)
@@ -277,6 +278,7 @@ class ConfluenceFetcher(DataFetcher):
 
         self.set_parent_and_fill_title()
         return [data.to_document_data() for data in self.page_information]
+
 
 if __name__ == "__main__":
     cf = ConfluenceFetcher()
@@ -294,5 +296,5 @@ if __name__ == "__main__":
         print(i.title)
         print(i.last_changed)
         print("length:", len(i.content))
-        #print(i.content)
+        # print(i.content)
         print("----" * 5)
