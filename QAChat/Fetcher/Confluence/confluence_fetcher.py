@@ -8,6 +8,7 @@ from typing import List
 import dateutil.parser
 import requests
 from atlassian import Confluence
+from tqdm import tqdm
 
 from QAChat.Fetcher.Confluence.confluence_page import ConfluencePage
 from QAChat.Fetcher.data_fetcher import DataFetcher
@@ -272,7 +273,7 @@ class ConfluenceFetcher(DataFetcher):
             print("Load Space: " + space)
             page_ids: List[str] = self.get_page_ids_from_spaces(space)
 
-            for page_id in page_ids:
+            for page_id in tqdm(page_ids):
                 page = self.get_data_from_page(page_id)
                 self.page_information.append(page)
 
