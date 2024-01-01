@@ -11,6 +11,7 @@ BLACKLIST_PATH = os.getenv("BLACKLIST_PATH")
 if BLACKLIST_PATH is None:
     raise Exception("BLACKLIST_PATH is not set")
 
+
 class FilterManager:
     def __init__(self):
         self.restricted_pages: List[str] = []

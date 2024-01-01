@@ -1,0 +1,4 @@
+llama-index
+llama_hub
+atlassian-python-api
+weaviate-client

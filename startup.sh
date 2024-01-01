@@ -79,6 +79,25 @@ function TestFunctions {
     done
 }
 
+function ExperimentFunctions {
+    items=(
+        "llamaindex Confluence Indexer"
+        "llamaindex Q/A"
+        "llamaindex Chat"
+    )
+
+    select item in "${items[@]}"
+    do
+        case $REPLY in
+            1) ${PYTHONEXEC} Testing/Experiments/llamaindex/confluenceIndexer.py; break;;
+            2) ${PYTHONEXEC} Testing/Experiments/llamaindex/qa.py; break;;
+            3) ${PYTHONEXEC} Testing/Experiments/llamaindex/chat.py; break;;
+            *) echo "Ooops - unknown choice $REPLY"; break;
+        esac
+    done
+}
+
+
 function FetchFunctions {
     items=(
         "Fetch Confluence Documents"
@@ -123,6 +142,7 @@ items=(
   "Database Maintenance"
   "Setup"
   "Tests"
+  "Experiments"
   "Fetchers"
   "Embed fetched documents"
   "Run Slack Bot"
@@ -134,10 +154,11 @@ do
         1) DBFunctions; break;;
         2) SetupFunctions; break;;
         3) TestFunctions; break;;
-        4) FetchFunctions; break;;
-        5) ${PYTHONEXEC} QAChat/Processors/main.py; break;;
-        6) ${PYTHONEXEC} QAChat/Slack_Bot/qa_agent.py; break;;
-        7) ${PYTHONEXEC} QAChat/QA_Bot/qa_bot.py; break;;
+        4) ExperimentFunctions; break;;
+        5) FetchFunctions; break;;
+        6) ${PYTHONEXEC} QAChat/Processors/main.py; break;;
+        7) ${PYTHONEXEC} QAChat/Slack_Bot/qa_agent.py; break;;
+        8) ${PYTHONEXEC} QAChat/QA_Bot/qa_bot.py; break;;
         *) echo "Ooops - unknown choice $REPLY"; break;
     esac
 done

@@ -28,7 +28,7 @@ def test_translation():
     similarity_score = []
     diff_arr = []
     # load all data from a csv file
-    data = load_data_from_csv("../../DummyData/qa_german.csv")
+    data = load_data_from_csv("../../../DummyData/qa_german.csv")
     total_start = datetime.now()
     comp_arr = []
     bleu_score_arr = []
