@@ -40,7 +40,7 @@ for space_key in CONFLUENCE_SPACE_WHITELIST:
                                       include_attachments=False,
                                       page_status="current",
                                       start=0,
-                                      max_num_results=5))
+                                      max_num_results=5000))
 
 print("Found {} documents".format(len(documents)))
 # for document in documents:
@@ -48,24 +48,23 @@ print("Found {} documents".format(len(documents)))
 #    print(document.text)
 
 
-response_synthesizer = get_response_synthesizer(
-    response_mode=ResponseMode.TREE_SUMMARIZE,
-    use_async=True
-)
-doc_summary_index = DocumentSummaryIndex.from_documents(
-    documents,
-    service_context=get_service_context(),
-    response_synthesizer=response_synthesizer,
-    show_progress=True,
-)
-doc_summary_index.storage_context.persist("index")
+# response_synthesizer = get_response_synthesizer(
+#    response_mode=ResponseMode.TREE_SUMMARIZE,
+#    use_async=True
+# )
+# doc_summary_index = DocumentSummaryIndex.from_documents(
+#    documents,
+#    service_context=get_service_context(),
+#    response_synthesizer=response_synthesizer,
+#    show_progress=True,
+# )
+# doc_summary_index.storage_context.persist("index")
 
 
-print(doc_summary_index.summary)
+# print(doc_summary_index.summary)
 
-
-#logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-#logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
+# logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+# logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 
 WEAVIATE_URL = os.getenv("WEAVIATE_URL")
 if WEAVIATE_URL is None:
