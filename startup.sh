@@ -17,6 +17,7 @@ while IFS= read -r line || [ -n "$line" ]; do
     export "$line"
 done < "$env_file"
 
+# create virtual env via "python3 -m venv venv"
 if [ -f "venv/bin/python3" ]; then
     echo "Found venv. Activating..."
     source venv/bin/activate
@@ -84,6 +85,7 @@ function ExperimentFunctions {
         "llamaindex Confluence Indexer"
         "llamaindex Q/A"
         "llamaindex Chat"
+        "llamaindex Slack Bot"
     )
 
     select item in "${items[@]}"
@@ -92,6 +94,7 @@ function ExperimentFunctions {
             1) ${PYTHONEXEC} Testing/Experiments/llamaindex/confluenceIndexer.py; break;;
             2) ${PYTHONEXEC} Testing/Experiments/llamaindex/qa.py; break;;
             3) ${PYTHONEXEC} Testing/Experiments/llamaindex/chat.py; break;;
+            4) ${PYTHONEXEC} Testing/Experiments/llamaindex/slack.py; break;;
             *) echo "Ooops - unknown choice $REPLY"; break;
         esac
     done
