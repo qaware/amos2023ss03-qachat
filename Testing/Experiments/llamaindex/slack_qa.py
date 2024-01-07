@@ -11,7 +11,7 @@ from llama_index import VectorStoreIndex
 from llama_index.response_synthesizers import ResponseMode
 from llama_index.vector_stores import WeaviateVectorStore
 
-from Testing.Experiments.llamaindex.serviceContext import get_service_context
+from Testing.Experiments.llamaindex.serviceContext import get_service_context, get_vector_store
 
 SLACK_TOKEN = os.getenv("SLACK_TOKEN")
 if SLACK_TOKEN is None:
@@ -21,24 +21,14 @@ SLACK_APP_TOKEN = os.getenv("SLACK_APP_TOKEN")
 if SLACK_APP_TOKEN is None:
     raise Exception("SLACK_APP_TOKEN not set")
 
-WEAVIATE_URL = os.getenv("WEAVIATE_URL")
-if WEAVIATE_URL is None:
-    raise Exception("WEAVIATE_URL is not set")
-
-get_service_context()
+service_context = get_service_context()
+vector_store = get_vector_store()
 
 app = App(token=SLACK_TOKEN)  # Slack-bolt
 handler = SocketModeHandler(app, SLACK_APP_TOKEN)  # SDK-bolt
 
-client = weaviate.Client(WEAVIATE_URL)
-
-vector_store = WeaviateVectorStore(
-    weaviate_client=client, index_name="LlamaIndex"
-)
-
 index = VectorStoreIndex.from_vector_store(vector_store)
 
-# default: similarity_top_k=2
 query_engine = index.as_query_engine(
     service_context=get_service_context(),
     vector_store_query_mode="hybrid",
@@ -48,10 +38,8 @@ query_engine = index.as_query_engine(
     streaming=False
 )
 
-
 def url_double_slash_fix(url):
     return url.replace("//", "/").replace(":/", "://")
-
 
 @app.message(re.compile(".*"))
 def on_message(message, say):

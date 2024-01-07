@@ -85,7 +85,8 @@ function ExperimentFunctions {
         "llamaindex Confluence Indexer"
         "llamaindex Q/A"
         "llamaindex Chat"
-        "llamaindex Slack Bot"
+        "llamaindex Slack Bot Q/A"
+        "llamaindex Slack Bot Chat"
     )
 
     select item in "${items[@]}"
@@ -94,7 +95,8 @@ function ExperimentFunctions {
             1) ${PYTHONEXEC} Testing/Experiments/llamaindex/confluenceIndexer.py; break;;
             2) ${PYTHONEXEC} Testing/Experiments/llamaindex/qa.py; break;;
             3) ${PYTHONEXEC} Testing/Experiments/llamaindex/chat.py; break;;
-            4) ${PYTHONEXEC} Testing/Experiments/llamaindex/slack.py; break;;
+            4) ${PYTHONEXEC} Testing/Experiments/llamaindex/slack_qa.py; break;;
+            5) ${PYTHONEXEC} Testing/Experiments/llamaindex/slack_chat.py; break;;
             *) echo "Ooops - unknown choice $REPLY"; break;
         esac
     done
