@@ -5,14 +5,15 @@ import os
 import logging
 import sys
 
-import weaviate
 from llama_index import VectorStoreIndex, StorageContext, Document, get_response_synthesizer, DocumentSummaryIndex
 from llama_index.response_synthesizers import ResponseMode
 from llama_index.vector_stores import WeaviateVectorStore
 
-from Testing.Experiments.llamaindex.serviceContext import get_service_context
+from Testing.Experiments.llamaindex.serviceContext import get_service_context, get_vector_store
 
-get_service_context()
+service_context = get_service_context()
+vector_store = get_vector_store()
+
 
 # Get Confluence API credentials from environment variables
 CONFLUENCE_ADDRESS = os.getenv("CONFLUENCE_ADDRESS")
@@ -65,16 +66,6 @@ print("Found {} documents".format(len(documents)))
 
 # logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 # logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
-
-WEAVIATE_URL = os.getenv("WEAVIATE_URL")
-if WEAVIATE_URL is None:
-    raise Exception("WEAVIATE_URL is not set")
-client = weaviate.Client(WEAVIATE_URL)
-
-vector_store = WeaviateVectorStore(
-    weaviate_client=client,
-    index_name="LlamaIndex"
-)
 
 storage_context = StorageContext.from_defaults(vector_store=vector_store)
 index = VectorStoreIndex.from_documents(
