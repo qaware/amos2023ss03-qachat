@@ -6,6 +6,8 @@
 -r QAChat/Documents/requirements.txt
 -r QAChat/VectorDB/requirements.txt
 -r Testing/requirements.txt
+-r Testing/Experiments/llamaindex/requirements.txt
+-r Testing/Experiments/ragas/requirements.txt
 prettytable
 spacy
 spacy-language-detection

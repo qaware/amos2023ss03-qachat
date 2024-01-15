@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+#set +x
 set -o pipefail
 
 export PYTHONPATH=$PYTHONPATH:${PWD}
@@ -86,7 +87,8 @@ function ExperimentFunctions {
         "llamaindex Q/A"
         "llamaindex Chat"
         "llamaindex Slack Bot Q/A"
-        "llamaindex Slack Bot Chat"
+        "llamaindex Slack Bot ReAct"
+        "ragas test"
     )
 
     select item in "${items[@]}"
@@ -97,6 +99,7 @@ function ExperimentFunctions {
             3) ${PYTHONEXEC} Testing/Experiments/llamaindex/chat.py; break;;
             4) ${PYTHONEXEC} Testing/Experiments/llamaindex/slack_qa.py; break;;
             5) ${PYTHONEXEC} Testing/Experiments/llamaindex/slack_chat.py; break;;
+            6) ${PYTHONEXEC} Testing/Experiments/ragas/quality.py; break;;
             *) echo "Ooops - unknown choice $REPLY"; break;
         esac
     done
